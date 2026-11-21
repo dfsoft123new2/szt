@@ -1,0 +1,2150 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>数之塔 · 从 1 数到 10↑↑↑10</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=STIX+Two+Text:ital,wght@0,400;0,600;1,400;1,600&family=Noto+Serif+SC:wght@600;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --paper: #edf1f4; --paper-2: #e3e9ee; --grid: rgba(44, 92, 150, .09); --grid-major: rgba(44, 92, 150, .16);
+  --ink: #16263f; --ink-2: #485a75; --ink-3: #8593a8; --rule: rgba(22, 38, 63, .18);
+  --red: #b8322a; --red-soft: rgba(184, 50, 42, .1); --hl: #f4d548; --hl-soft: rgba(244, 213, 72, .45);
+  --card: #f7f9fb; --ok: #2f7d4f; --shadow: 0 1px 0 rgba(22, 38, 63, .08);
+  --num: "STIX Two Text", "Times New Roman", "Songti SC", serif;
+  --cn: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --head: "Noto Serif SC", "Songti SC", "SimSun", serif;
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #1d2a25; --paper-2: #17221e; --grid: rgba(225, 235, 225, .035); --grid-major: rgba(225, 235, 225, .06);
+    --ink: #e8ede5; --ink-2: #aebdb3; --ink-3: #75887c; --rule: rgba(232, 237, 229, .16);
+    --red: #f3907f; --red-soft: rgba(243, 144, 127, .12); --hl: #f2d16b; --hl-soft: rgba(242, 209, 107, .18);
+    --card: #22312b; --ok: #8fd3a4; --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #1d2a25; --paper-2: #17221e; --grid: rgba(225, 235, 225, .035); --grid-major: rgba(225, 235, 225, .06);
+  --ink: #e8ede5; --ink-2: #aebdb3; --ink-3: #75887c; --rule: rgba(232, 237, 229, .16);
+  --red: #f3907f; --red-soft: rgba(243, 144, 127, .12); --hl: #f2d16b; --hl-soft: rgba(242, 209, 107, .18);
+  --card: #22312b; --ok: #8fd3a4; --shadow: none; color-scheme: dark;
+}
+html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+*, *::before, *::after { box-sizing: inherit; }
+body {
+  margin: 0; min-height: 100%; color: var(--ink); font: 15px/1.6 var(--cn);
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px), linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  -webkit-font-smoothing: antialiased;
+}
+button, select, input, textarea { font: inherit; color: inherit; }
+.num { font-family: var(--num); font-variant-numeric: tabular-nums lining-nums; }
+.it { font-family: var(--num); font-style: italic; }
+
+/* ---------- 布局 ---------- */
+#app { display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+#rail {
+  position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 22px 20px 20px;
+  border-right: 1px solid var(--rule); background: color-mix(in srgb, var(--paper) 86%, transparent);
+  backdrop-filter: blur(2px);
+}
+#main { padding: 18px clamp(16px, 4vw, 48px) 80px; max-width: 1040px; width: 100%; }
+
+.brand { font-family: var(--head); font-weight: 900; font-size: 20px; letter-spacing: .04em; margin: 0 0 2px; }
+.brand small { font-family: var(--num); font-style: italic; font-weight: 400; font-size: 13px; color: var(--ink-3); margin-left: 6px; }
+
+/* 主数字：数学排版 */
+.hero { margin: 18px 0 6px; }
+.hero .lbl { font-size: 12px; color: var(--ink-3); }
+.hero .val { font-family: var(--num); font-size: 34px; line-height: 1.15; word-break: break-all; min-height: 48px; }
+.hero .val .x { color: var(--ink-2); margin: 0 .12em; font-size: .8em; }
+.hero .val sup, .tw sup { font-size: .58em; vertical-align: .95em; line-height: 0; }
+.hero .val .arr { color: var(--red); letter-spacing: -.05em; margin: 0 .04em; }
+.rate { font-family: var(--num); color: var(--ink-2); font-size: 14px; min-height: 22px; }
+.famous { margin: 12px 0 4px; font-size: 12.5px; color: var(--ink-2); }
+.famous b { font-family: var(--head); font-weight: 600; color: var(--ink); }
+.bar { height: 6px; background: var(--paper-2); border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; margin-top: 5px; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--red); transition: width .3s; }
+
+nav.chapters { margin-top: 20px; display: flex; flex-direction: column; gap: 2px; }
+nav.chapters button {
+  display: flex; align-items: baseline; gap: 10px; width: 100%; text-align: left; background: none; border: 0;
+  padding: 7px 10px; border-radius: 4px; cursor: pointer; color: var(--ink-2); font-size: 15px;
+}
+nav.chapters button .s { font-family: var(--num); font-style: italic; color: var(--ink-3); width: 24px; flex: none; }
+nav.chapters button:hover { background: var(--red-soft); color: var(--ink); }
+nav.chapters button[aria-current="page"] { color: var(--ink); background: var(--hl-soft); font-weight: 600; }
+nav.chapters button[aria-current="page"] .s { color: var(--red); }
+nav.chapters button.locked { color: var(--ink-3); cursor: default; }
+nav.chapters button.locked:hover { background: none; }
+nav.chapters button .dot { margin-left: auto; width: 7px; height: 7px; border-radius: 50%; background: var(--red); display: none; align-self: center; }
+nav.chapters button.notify .dot { display: block; }
+nav.chapters hr { border: 0; border-top: 1px dashed var(--rule); margin: 10px 0; width: 100%; }
+
+/* 快讯 */
+#news { font-size: 13px; color: var(--ink-2); border-bottom: 1px dashed var(--rule); padding: 2px 0 10px; margin-bottom: 18px; min-height: 32px; display: flex; gap: 10px; align-items: baseline; }
+#news .tag { font-family: var(--num); font-style: italic; color: var(--red); flex: none; }
+#news span.t { transition: opacity .4s; }
+
+/* 章节 */
+.chap-head { margin: 4px 0 20px; }
+.chap-head h2 { font-family: var(--head); font-weight: 900; font-size: 30px; margin: 0; line-height: 1.25; letter-spacing: .02em; }
+.chap-head h2 .s { font-family: var(--num); font-style: italic; font-weight: 400; color: var(--red); margin-right: 12px; }
+.chap-head p { margin: 6px 0 0; color: var(--ink-2); max-width: 62ch; }
+h3 { font-family: var(--head); font-weight: 600; font-size: 18px; margin: 30px 0 10px; }
+h3 .sub { font-family: var(--cn); font-weight: 400; font-size: 13px; color: var(--ink-3); margin-left: 8px; }
+.muted { color: var(--ink-3); font-size: 13px; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+/* 按钮 */
+.btn {
+  border: 1.5px solid var(--ink); background: var(--card); padding: 7px 14px; border-radius: 3px; cursor: pointer;
+  font-size: 14px; line-height: 1.3; box-shadow: 2px 2px 0 var(--rule); transition: transform .06s, box-shadow .06s;
+}
+.btn:hover { transform: translate(-1px, -1px); box-shadow: 3px 3px 0 var(--rule); }
+.btn:active { transform: translate(1px, 1px); box-shadow: 0 0 0 var(--rule); }
+.btn.can { background: linear-gradient(transparent 12%, var(--hl-soft) 12%, var(--hl-soft) 88%, transparent 88%), var(--card); }
+.btn[disabled], .btn.no { opacity: .45; cursor: not-allowed; transform: none; box-shadow: 2px 2px 0 var(--rule); }
+.btn.red { border-color: var(--red); color: var(--red); }
+.btn.red.can { background: var(--red); color: var(--paper); }
+.btn.big { font-size: 16px; padding: 11px 20px; font-family: var(--head); font-weight: 600; }
+.btn.sm { font-size: 13px; padding: 4px 10px; }
+.btn small { display: block; font-size: 12px; opacity: .8; font-family: var(--num); }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* 计数器表 */
+.gens { border-top: 1.5px solid var(--ink); }
+.gen { display: grid; grid-template-columns: 44px minmax(120px, 1.4fr) minmax(90px, 1fr) minmax(70px, .8fr) auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.seal { width: 38px; height: 38px; display: grid; place-items: center; font-family: var(--head); font-weight: 900; font-size: 20px; color: var(--red); border: 2px solid var(--red); border-radius: 4px; transform: rotate(-3deg); }
+.gen .nm { font-weight: 600; }
+.gen .nm small { display: block; font-weight: 400; color: var(--ink-3); font-size: 12px; }
+.gen .amt { font-family: var(--num); font-size: 16px; }
+.gen .amt small { display: block; color: var(--ink-3); font-size: 12px; font-family: var(--cn); }
+.gen .mul { font-family: var(--num); color: var(--ink-2); }
+.gen .bt { display: flex; gap: 6px; }
+.gen.next { opacity: .5; }
+
+/* 定理框 */
+.theorems { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.thm { border-left: 3px solid var(--ink); padding: 8px 14px 12px; background: var(--card); box-shadow: var(--shadow); position: relative; }
+.thm .ti { font-family: var(--head); font-weight: 600; }
+.thm .ti .k { font-family: var(--num); font-style: italic; font-weight: 400; color: var(--ink-3); margin-right: 6px; }
+.thm .fm { font-family: var(--num); font-style: italic; font-size: 17px; margin: 4px 0; color: var(--ink-2); }
+.thm .ef { font-size: 13.5px; }
+.thm .ft { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; gap: 8px; }
+.thm.done { border-left-color: var(--ok); }
+.thm.done .qed { display: inline; }
+.qed { display: none; font-family: var(--num); color: var(--ok); font-size: 18px; }
+.thm.lock { opacity: .55; }
+
+/* 矩阵（无穷升级） */
+.matrix { display: inline-grid; grid-template-columns: repeat(4, minmax(0, 168px)); gap: 8px; padding: 6px 18px; position: relative; max-width: 100%; }
+.matrix::before, .matrix::after { content: ""; position: absolute; top: 0; bottom: 0; width: 10px; border: 2px solid var(--ink); }
+.matrix::before { left: 0; border-right: 0; }
+.matrix::after { right: 0; border-left: 0; }
+.cell { border: 1px solid var(--rule); background: var(--card); padding: 8px 9px; font-size: 13px; cursor: pointer; text-align: left; border-radius: 2px; min-height: 92px; display: flex; flex-direction: column; gap: 2px; }
+.cell b { font-family: var(--head); font-weight: 600; font-size: 14px; }
+.cell .c { margin-top: auto; font-family: var(--num); color: var(--ink-2); }
+.cell.can { background: linear-gradient(transparent 0, var(--hl-soft) 0), var(--card); border-color: var(--ink); }
+.cell.done { border-color: var(--ok); }
+.cell.done .c::after { content: " ∎"; color: var(--ok); }
+.cell.lock { opacity: .45; cursor: default; }
+
+/* 卡片式面板 */
+.panel { background: var(--card); border: 1px solid var(--rule); border-radius: 4px; padding: 14px 16px; box-shadow: var(--shadow); }
+.panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.panel h4 { margin: 0 0 4px; font-family: var(--head); font-weight: 600; font-size: 16px; }
+.panel .big { font-family: var(--num); font-size: 24px; }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; font-size: 14px; }
+.kv dt { color: var(--ink-3); }
+.kv dd { margin: 0; font-family: var(--num); }
+
+/* 质数网格 */
+.pgrid { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 3px; max-width: 560px; font-family: var(--num); font-size: 12px; }
+.pgrid span { border: 1px solid var(--rule); padding: 4px 2px; text-align: center; color: var(--ink-3); overflow: hidden; text-overflow: clip; white-space: nowrap; }
+.pgrid span.p { color: var(--paper); background: var(--red); border-color: var(--red); font-weight: 600; }
+.mers { display: flex; flex-wrap: wrap; gap: 5px; font-family: var(--num); font-size: 12.5px; }
+.mers span { border: 1px dashed var(--rule); padding: 1px 6px; color: var(--ink-3); border-radius: 10px; }
+.mers span.f { border-style: solid; border-color: var(--red); color: var(--red); }
+
+/* 猜想 */
+.probs { counter-reset: prob; display: grid; gap: 12px; }
+.prob { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--rule); }
+.prob .k { font-family: var(--num); font-style: italic; font-size: 22px; color: var(--red); }
+.prob .ti { font-family: var(--head); font-weight: 600; font-size: 17px; }
+.prob .st { font-size: 13px; color: var(--ink-2); }
+.prob.done .ti::after { content: " ∎"; font-family: var(--num); color: var(--ok); }
+.prob.cur { background: var(--hl-soft); }
+
+/* 常数 */
+.const { border-left: 3px solid var(--red); }
+.digits { font-family: var(--num); font-size: 18px; word-break: break-all; line-height: 1.5; margin: 6px 0; max-height: 7.5em; overflow-y: auto; }
+.digits .nx { color: var(--ink-3); }
+.digits .sym { font-style: italic; color: var(--red); margin-right: 6px; }
+
+/* 塔 */
+.tower { display: flex; flex-direction: column-reverse; align-items: flex-start; gap: 2px; min-height: 40px; }
+.tower span { font-family: var(--num); font-size: 15px; border: 1px solid var(--ink); padding: 0 8px; background: var(--card); }
+.tower span:nth-child(odd) { margin-left: 10px; }
+.tower span.part { opacity: .5; border-style: dashed; }
+.prog { font-family: var(--num); font-size: 44px; line-height: 1.1; }
+.prog .arr { color: var(--red); }
+
+/* 成就 */
+.achs { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+.ach { border: 1px solid var(--rule); min-height: 64px; padding: 6px; font-size: 12.5px; background: var(--card); border-radius: 2px; position: relative; }
+.ach b { display: block; font-family: var(--head); font-weight: 600; font-size: 13px; }
+.ach.got { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 10%, var(--card)); }
+.ach:not(.got) { color: var(--ink-3); }
+.flist { display: grid; gap: 4px; }
+.flist div { display: grid; grid-template-columns: 24px 160px 1fr; gap: 10px; font-size: 13.5px; align-items: baseline; }
+.flist div.got { color: var(--ink); }
+.flist div:not(.got) { color: var(--ink-3); }
+.flist .m { font-family: var(--num); color: var(--ok); }
+
+/* 浮层 */
+#toasts { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 8px; z-index: 50; max-width: min(340px, 90vw); }
+.toast { background: var(--card); border: 1.5px solid var(--ink); border-left: 5px solid var(--red); padding: 9px 14px; font-size: 14px; box-shadow: 3px 3px 0 var(--rule); animation: tin .25s ease-out; }
+.toast b { font-family: var(--head); }
+@keyframes tin { from { transform: translateX(30px); opacity: 0; } }
+#modal { position: fixed; inset: 0; background: color-mix(in srgb, var(--paper) 70%, transparent); backdrop-filter: blur(3px); display: none; place-items: center; z-index: 60; padding: 20px; }
+#modal.on { display: grid; }
+#modal .box { background: var(--card); border: 2px solid var(--ink); box-shadow: 6px 6px 0 var(--rule); max-width: 560px; width: 100%; padding: 26px 28px; max-height: 90vh; overflow-y: auto; }
+#modal .box h2 { font-family: var(--head); font-weight: 900; margin: 0 0 10px; font-size: 26px; }
+#modal .box .glyph { font-family: var(--num); font-size: 72px; color: var(--red); line-height: 1; margin-bottom: 8px; }
+#modal .box p { margin: 8px 0; }
+#modal .box .acts { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; flex-wrap: wrap; }
+textarea { width: 100%; min-height: 90px; background: var(--paper-2); border: 1px solid var(--rule); padding: 8px; font-family: var(--num); font-size: 12px; border-radius: 3px; }
+select, input[type=text] { background: var(--card); border: 1px solid var(--ink); padding: 5px 8px; border-radius: 3px; }
+label.tg { display: inline-flex; gap: 6px; align-items: center; font-size: 13.5px; cursor: pointer; user-select: none; }
+canvas#frac { width: 100%; max-width: 340px; aspect-ratio: 1.1547; display: block; }
+.mobilebar { display: none; }
+
+/* ---------- 窄屏 ---------- */
+@media (max-width: 860px) {
+  #app { grid-template-columns: 1fr; }
+  #rail { position: sticky; top: 0; height: auto; z-index: 20; padding: 10px 14px 0; border-right: 0; border-bottom: 1px solid var(--rule); background: var(--paper); }
+  body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--paper); }
+  .brand { font-size: 15px; }
+  .hero { margin: 4px 0 0; }
+  .hero .val { font-size: 24px; min-height: 32px; }
+  .famous, .hero .lbl { display: none; }
+  nav.chapters { flex-direction: row; overflow-x: auto; margin: 8px -14px 0; padding: 0 10px 6px; gap: 0; scrollbar-width: none; }
+  nav.chapters button { width: auto; flex: none; padding: 6px 10px; font-size: 14px; }
+  nav.chapters button .s { width: auto; }
+  nav.chapters hr { display: none; }
+  #main { padding: 14px 14px 80px; }
+  .gen { grid-template-columns: 40px 1fr auto; }
+  .gen .mul { display: none; }
+  .gen .bt { grid-column: 2 / 4; }
+  .matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .achs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .flist div { grid-template-columns: 20px 110px 1fr; }
+  .chap-head h2 { font-size: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="rail">
+    <p class="brand">数之塔<small>v1.0.0</small></p>
+    <div class="hero" aria-live="off">
+      <div class="lbl">你数到了</div>
+      <div class="val" id="heroVal">10</div>
+      <div class="rate" id="heroRate"></div>
+    </div>
+    <div class="famous" id="famous"></div>
+    <nav class="chapters" id="nav" aria-label="章节"></nav>
+  </aside>
+  <main id="main">
+    <div id="news"><span class="tag">快讯</span><span class="t" id="newsT"></span></div>
+    <div id="view"></div>
+  </main>
+</div>
+<div id="toasts" aria-live="polite"></div>
+<div id="modal" role="dialog" aria-modal="true"><div class="box" id="modalBox"></div></div>
+<script>
+!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?module.exports=t():"function"==typeof define&&define.amd?define(t):(e="undefined"!=typeof globalThis?globalThis:e||self).Decimal=t()}(this,(function(){"use strict";function e(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}function t(e,t){for(var i=0;i<t.length;i++){var r=t[i];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}function i(e,i,r){return i&&t(e.prototype,i),r&&t(e,r),Object.defineProperty(e,"prototype",{writable:!1}),e}var r=function(){function t(i){e(this,t),this.map=new Map,this.first=void 0,this.last=void 0,this.maxSize=i}return i(t,[{key:"size",get:function(){return this.map.size}},{key:"get",value:function(e){var t=this.map.get(e);if(void 0!==t)return t!==this.first&&(t===this.last?(this.last=t.prev,this.last.next=void 0):(t.prev.next=t.next,t.next.prev=t.prev),t.next=this.first,this.first.prev=t,this.first=t),t.value}},{key:"set",value:function(e,t){if(!(this.maxSize<1)){if(this.map.has(e))throw new Error("Cannot update existing keys in the cache");var i=new n(e,t);for(void 0===this.first?(this.first=i,this.last=i):(i.next=this.first,this.first.prev=i,this.first=i),this.map.set(e,i);this.map.size>this.maxSize;){var r=this.last;this.map.delete(r.key),this.last=r.prev,this.last.next=void 0}}}}]),t}(),n=i((function t(i,r){e(this,t),this.next=void 0,this.prev=void 0,this.key=i,this.value=r})),a=9e15,s=Math.log10(9e15),u=1/9e15,o=function(){for(var e=[],t=-323;t<=308;t++)e.push(Number("1e"+t));return function(t){return e[t+323]}}(),l=[2,Math.E,3,4,5,6,7,8,9,10],h=[[1,1.0891180521811203,1.1789767925673957,1.2701455431742086,1.3632090180450092,1.4587818160364217,1.5575237916251419,1.6601571006859253,1.767485818836978,1.8804192098842727,2],[1,1.1121114330934079,1.231038924931609,1.3583836963111375,1.4960519303993531,1.6463542337511945,1.8121385357018724,1.996971324618307,2.2053895545527546,2.4432574483385254,Math.E],[1,1.1187738849693603,1.2464963939368214,1.38527004705667,1.5376664685821402,1.7068895236551784,1.897001227148399,2.1132403089001035,2.362480153784171,2.6539010333870774,3],[1,1.1367350847096405,1.2889510672956703,1.4606478703324786,1.6570295196661111,1.8850062585672889,2.1539465047453485,2.476829779693097,2.872061932789197,3.3664204535587183,4],[1,1.1494592900767588,1.319708228183931,1.5166291280087583,1.748171114438024,2.0253263297298045,2.3636668498288547,2.7858359149579424,3.3257226212448145,4.035730287722532,5],[1,1.159225940787673,1.343712473580932,1.5611293155111927,1.8221199554561318,2.14183924486326,2.542468319282638,3.0574682501653316,3.7390572020926873,4.6719550537360774,6],[1,1.1670905356972596,1.3632807444991446,1.5979222279405536,1.8842640123816674,2.2416069644878687,2.69893426559423,3.3012632110403577,4.121250340630164,5.281493033448316,7],[1,1.1736630594087796,1.379783782386201,1.6292821855668218,1.9378971836180754,2.3289975651071977,2.8384347394720835,3.5232708454565906,4.478242031114584,5.868592169644505,8],[1,1.1793017514670474,1.394054150657457,1.65664127441059,1.985170999970283,2.4069682290577457,2.9647310119960752,3.7278665320924946,4.814462547283592,6.436522247411611,9],[1,1.1840100246247336,1.4061375836156955,1.6802272208863964,2.026757028388619,2.4770056063449646,3.080525271755482,3.9191964192627284,5.135152840833187,6.989961179534715,10]],g=[[-1,-.9194161097107025,-.8335625019330468,-.7425599821143978,-.6466611521029437,-.5462617907227869,-.4419033816638769,-.3342645487554494,-.224140440909962,-.11241087890006762,0],[-1,-.90603157029014,-.80786507256596,-.7064666939634,-.60294836853664,-.49849837513117,-.39430303318768,-.29147201034755,-.19097820800866,-.09361896280296,0],[-1,-.9021579584316141,-.8005762598234203,-.6964780623319391,-.5911906810998454,-.486050182576545,-.3823089430815083,-.28106046722897615,-.1831906535795894,-.08935809204418144,0],[-1,-.8917227442365535,-.781258746326964,-.6705130326902455,-.5612813129406509,-.4551067709033134,-.35319256652135966,-.2563741554088552,-.1651412821106526,-.0796919581982668,0],[-1,-.8843387974366064,-.7678744063886243,-.6529563724510552,-.5415870994657841,-.4352842206588936,-.33504449124791424,-.24138853420685147,-.15445285440944467,-.07409659641336663,0],[-1,-.8786709358426346,-.7577735191184886,-.6399546189952064,-.527284921869926,-.4211627631006314,-.3223479611761232,-.23107655627789858,-.1472057700818259,-.07035171210706326,0],[-1,-.8740862815291583,-.7497032990976209,-.6297119746181752,-.5161838335958787,-.41036238255751956,-.31277212146489963,-.2233976621705518,-.1418697367979619,-.06762117662323441,0],[-1,-.8702632331800649,-.7430366914122081,-.6213373075161548,-.5072025698095242,-.40171437727184167,-.30517930701410456,-.21736343968190863,-.137710238299109,-.06550774483471955,0],[-1,-.8670016295947213,-.7373984232432306,-.6143173985094293,-.49973884395492807,-.394584953527678,-.2989649949848695,-.21245647317021688,-.13434688362382652,-.0638072667348083,0],[-1,-.8641642839543857,-.732534623168535,-.6083127477059322,-.4934049257184696,-.3885773075899922,-.29376029055315767,-.2083678561173622,-.13155653399373268,-.062401588652553186,0]],f=function(e){return b.fromValue_noAlloc(e)},m=function(e,t,i){return b.fromComponents(e,t,i)},c=function(e,t,i){return b.fromComponents_noNormalize(e,t,i)},v=function(e,t){var i=t+1,r=Math.ceil(Math.log10(Math.abs(e))),n=Math.round(e*Math.pow(10,i-r))*Math.pow(10,r-i);return parseFloat(n.toFixed(Math.max(i-r,0)))},y=function(e){return Math.sign(e)*Math.log10(Math.abs(e))},d=.5671432904097838,N=function(e){var t,i,r=arguments.length>1&&void 0!==arguments[1]?arguments[1]:1e-10,n=!(arguments.length>2&&void 0!==arguments[2])||arguments[2];if(!Number.isFinite(e))return e;if(n){if(0===e)return e;if(1===e)return d;t=e<10?0:Math.log(e)-Math.log(Math.log(e))}else{if(0===e)return-1/0;t=e<=-.1?-2:Math.log(-e)-Math.log(-Math.log(-e))}for(var a=0;a<100;++a){if(i=(e*Math.exp(-t)+t*t)/(t+1),Math.abs(i-t)<r*Math.abs(i))return i;t=i}throw Error("Iteration failed to converge: ".concat(e.toString()))};function p(e){var t,i,r,n,a=arguments.length>1&&void 0!==arguments[1]?arguments[1]:1e-10,s=!(arguments.length>2&&void 0!==arguments[2])||arguments[2];if(!Number.isFinite(e.mag))return new b(e);if(s){if(e.eq(b.dZero))return c(0,0,0);if(e.eq(b.dOne))return b.fromNumber(d);t=b.ln(e)}else{if(e.eq(b.dZero))return new b(b.dNegInf);t=b.ln(e.neg())}for(var u=0;u<100;++u){if(i=t.neg().exp(),r=t.sub(e.mul(i)),n=t.sub(r.div(t.add(1).sub(t.add(2).mul(r).div(b.mul(2,t).add(2))))),b.abs(n.sub(t)).lt(b.abs(n).mul(a)))return n;t=n}throw Error("Iteration failed to converge: ".concat(e.toString()))}var b=function(){function t(i){e(this,t),this.sign=0,this.mag=0,this.layer=0,i instanceof t?this.fromDecimal(i):"number"==typeof i?this.fromNumber(i):"string"==typeof i&&this.fromString(i)}return i(t,[{key:"m",get:function(){if(0===this.sign)return 0;if(0===this.layer){var e,t=Math.floor(Math.log10(this.mag));return e=5e-324===this.mag?5:this.mag/o(t),this.sign*e}if(1===this.layer){var i=this.mag-Math.floor(this.mag);return this.sign*Math.pow(10,i)}return this.sign},set:function(e){this.layer<=2?this.fromMantissaExponent(e,this.e):(this.sign=Math.sign(e),0===this.sign&&(this.layer=0,this.exponent=0))}},{key:"e",get:function(){return 0===this.sign?0:0===this.layer?Math.floor(Math.log10(this.mag)):1===this.layer?Math.floor(this.mag):2===this.layer?Math.floor(Math.sign(this.mag)*Math.pow(10,Math.abs(this.mag))):this.mag*Number.POSITIVE_INFINITY},set:function(e){this.fromMantissaExponent(this.m,e)}},{key:"s",get:function(){return this.sign},set:function(e){0===e?(this.sign=0,this.layer=0,this.mag=0):this.sign=e}},{key:"mantissa",get:function(){return this.m},set:function(e){this.m=e}},{key:"exponent",get:function(){return this.e},set:function(e){this.e=e}},{key:"normalize",value:function(){if(0===this.sign||0===this.mag&&0===this.layer||this.mag===Number.NEGATIVE_INFINITY&&this.layer>0&&Number.isFinite(this.layer))return this.sign=0,this.mag=0,this.layer=0,this;if(0===this.layer&&this.mag<0&&(this.mag=-this.mag,this.sign=-this.sign),this.mag===Number.POSITIVE_INFINITY||this.layer===Number.POSITIVE_INFINITY||this.mag===Number.NEGATIVE_INFINITY||this.layer===Number.NEGATIVE_INFINITY)return this.mag=Number.POSITIVE_INFINITY,this.layer=Number.POSITIVE_INFINITY,this;if(0===this.layer&&this.mag<u)return this.layer+=1,this.mag=Math.log10(this.mag),this;var e=Math.abs(this.mag),t=Math.sign(this.mag);if(e>=a)return this.layer+=1,this.mag=t*Math.log10(e),this;for(;e<s&&this.layer>0;)this.layer-=1,0===this.layer?this.mag=Math.pow(10,this.mag):(this.mag=t*Math.pow(10,e),e=Math.abs(this.mag),t=Math.sign(this.mag));return 0===this.layer&&(this.mag<0?(this.mag=-this.mag,this.sign=-this.sign):0===this.mag&&(this.sign=0)),(Number.isNaN(this.sign)||Number.isNaN(this.layer)||Number.isNaN(this.mag))&&(this.sign=Number.NaN,this.layer=Number.NaN,this.mag=Number.NaN),this}},{key:"fromComponents",value:function(e,t,i){return this.sign=e,this.layer=t,this.mag=i,this.normalize(),this}},{key:"fromComponents_noNormalize",value:function(e,t,i){return this.sign=e,this.layer=t,this.mag=i,this}},{key:"fromMantissaExponent",value:function(e,t){return this.layer=1,this.sign=Math.sign(e),e=Math.abs(e),this.mag=t+Math.log10(e),this.normalize(),this}},{key:"fromMantissaExponent_noNormalize",value:function(e,t){return this.fromMantissaExponent(e,t),this}},{key:"fromDecimal",value:function(e){return this.sign=e.sign,this.layer=e.layer,this.mag=e.mag,this}},{key:"fromNumber",value:function(e){return this.mag=Math.abs(e),this.sign=Math.sign(e),this.layer=0,this.normalize(),this}},{key:"fromString",value:function(e){var i=arguments.length>1&&void 0!==arguments[1]&&arguments[1],r=e,n=t.fromStringCache.get(r);if(void 0!==n)return this.fromDecimal(n);if("nan"===(e=e.replace(",","")).toLowerCase())return this.fromDecimal(t.dNaN);if("infinity"===e.toLowerCase())return this.fromDecimal(t.dInf);if("-infinity"===e.toLowerCase())return this.fromDecimal(t.dNegInf);var a=e.split("^^^");if(2===a.length){var s=parseFloat(a[0]),u=parseFloat(a[1]),o=a[1].split(";"),l=1;if(2===o.length&&(l=parseFloat(o[1]),isFinite(l)||(l=1)),isFinite(s)&&isFinite(u)){var h=t.pentate(s,u,l,i);return this.sign=h.sign,this.layer=h.layer,this.mag=h.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}}var g=e.split("^^");if(2===g.length){var c=parseFloat(g[0]),v=parseFloat(g[1]),d=g[1].split(";"),N=1;if(2===d.length&&(N=parseFloat(d[1]),isFinite(N)||(N=1)),isFinite(c)&&isFinite(v)){var p=t.tetrate(c,v,N,i);return this.sign=p.sign,this.layer=p.layer,this.mag=p.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}}var b,k,w=e.split("^");if(2===w.length){var M=parseFloat(w[0]),I=parseFloat(w[1]);if(isFinite(M)&&isFinite(I)){var _=t.pow(M,I);return this.sign=_.sign,this.layer=_.layer,this.mag=_.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}}var q=(e=e.trim().toLowerCase()).split("pt");if(2===q.length){b=10;var F=!1;"-"==q[0][0]&&(F=!0,q[0]=q[0].slice(1)),k=parseFloat(q[0]),q[1]=q[1].replace("(",""),q[1]=q[1].replace(")","");var S=parseFloat(q[1]);if(isFinite(S)||(S=1),isFinite(b)&&isFinite(k)){var x=t.tetrate(b,k,S,i);return this.sign=x.sign,this.layer=x.layer,this.mag=x.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),F&&(this.sign*=-1),this}}if(2===(q=e.split("p")).length){b=10;var E=!1;"-"==q[0][0]&&(E=!0,q[0]=q[0].slice(1)),k=parseFloat(q[0]),q[1]=q[1].replace("(",""),q[1]=q[1].replace(")","");var T=parseFloat(q[1]);if(isFinite(T)||(T=1),isFinite(b)&&isFinite(k)){var O=t.tetrate(b,k,T,i);return this.sign=O.sign,this.layer=O.layer,this.mag=O.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),E&&(this.sign*=-1),this}}if(2===(q=e.split("f")).length){b=10;var C=!1;"-"==q[0][0]&&(C=!0,q[0]=q[0].slice(1)),q[0]=q[0].replace("(",""),q[0]=q[0].replace(")","");var z=parseFloat(q[0]);if(q[1]=q[1].replace("(",""),q[1]=q[1].replace(")",""),k=parseFloat(q[1]),isFinite(z)||(z=1),isFinite(b)&&isFinite(k)){var V=t.tetrate(b,k,z,i);return this.sign=V.sign,this.layer=V.layer,this.mag=V.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),C&&(this.sign*=-1),this}}var A=e.split("e"),P=A.length-1;if(0===P){var D=parseFloat(e);if(isFinite(D))return this.fromNumber(D),t.fromStringCache.size>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}else if(1===P){var Z=parseFloat(e);if(isFinite(Z)&&Math.abs(Z)>1e-307)return this.fromNumber(Z),t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}var Y=e.split("e^");if(2===Y.length){this.sign=1,"-"==Y[0].charAt(0)&&(this.sign=-1);for(var L="",G=0;G<Y[1].length;++G){var U=Y[1].charCodeAt(G);if(!(U>=43&&U<=57||101===U)){if(this.layer=parseFloat(L),this.mag=parseFloat(Y[1].substr(G+1)),this.layer<0||this.layer%1!=0){var X=t.tetrate(10,this.layer,this.mag,i);this.sign=X.sign,this.layer=X.layer,this.mag=X.mag}return this.normalize(),t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}L+=Y[1].charAt(G)}}if(P<1)return this.sign=0,this.layer=0,this.mag=0,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this;var W=parseFloat(A[0]);if(0===W)return this.sign=0,this.layer=0,this.mag=0,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this;var j=parseFloat(A[A.length-1]);if(P>=2){var B=parseFloat(A[A.length-2]);isFinite(B)&&(j*=Math.sign(B),j+=y(B))}if(isFinite(W))if(1===P)this.sign=Math.sign(W),this.layer=1,this.mag=j+Math.log10(Math.abs(W));else{if(this.sign=Math.sign(W),this.layer=P,2===P){var R=t.mul(m(1,2,j),f(W));return this.sign=R.sign,this.layer=R.layer,this.mag=R.mag,t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}this.mag=j}else this.sign="-"===A[0]?-1:1,this.layer=P,this.mag=j;return this.normalize(),t.fromStringCache.maxSize>=1&&t.fromStringCache.set(r,t.fromDecimal(this)),this}},{key:"fromValue",value:function(e){return e instanceof t?this.fromDecimal(e):"number"==typeof e?this.fromNumber(e):"string"==typeof e?this.fromString(e):(this.sign=0,this.layer=0,this.mag=0,this)}},{key:"toNumber",value:function(){return this.mag===Number.POSITIVE_INFINITY&&this.layer===Number.POSITIVE_INFINITY&&1===this.sign?Number.POSITIVE_INFINITY:this.mag===Number.POSITIVE_INFINITY&&this.layer===Number.POSITIVE_INFINITY&&-1===this.sign?Number.NEGATIVE_INFINITY:Number.isFinite(this.layer)?0===this.layer?this.sign*this.mag:1===this.layer?this.sign*Math.pow(10,this.mag):this.mag>0?this.sign>0?Number.POSITIVE_INFINITY:Number.NEGATIVE_INFINITY:0:Number.NaN}},{key:"mantissaWithDecimalPlaces",value:function(e){return isNaN(this.m)?Number.NaN:0===this.m?0:v(this.m,e)}},{key:"magnitudeWithDecimalPlaces",value:function(e){return isNaN(this.mag)?Number.NaN:0===this.mag?0:v(this.mag,e)}},{key:"toString",value:function(){return isNaN(this.layer)||isNaN(this.sign)||isNaN(this.mag)?"NaN":this.mag===Number.POSITIVE_INFINITY||this.layer===Number.POSITIVE_INFINITY?1===this.sign?"Infinity":"-Infinity":0===this.layer?this.mag<1e21&&this.mag>1e-7||0===this.mag?(this.sign*this.mag).toString():this.m+"e"+this.e:1===this.layer?this.m+"e"+this.e:this.layer<=5?(-1===this.sign?"-":"")+"e".repeat(this.layer)+this.mag:(-1===this.sign?"-":"")+"(e^"+this.layer+")"+this.mag}},{key:"toExponential",value:function(e){return 0===this.layer?(this.sign*this.mag).toExponential(e):this.toStringWithDecimalPlaces(e)}},{key:"toFixed",value:function(e){return 0===this.layer?(this.sign*this.mag).toFixed(e):this.toStringWithDecimalPlaces(e)}},{key:"toPrecision",value:function(e){return this.e<=-7?this.toExponential(e-1):e>this.e?this.toFixed(e-this.exponent-1):this.toExponential(e-1)}},{key:"valueOf",value:function(){return this.toString()}},{key:"toJSON",value:function(){return this.toString()}},{key:"toStringWithDecimalPlaces",value:function(e){return 0===this.layer?this.mag<1e21&&this.mag>1e-7||0===this.mag?(this.sign*this.mag).toFixed(e):v(this.m,e)+"e"+v(this.e,e):1===this.layer?v(this.m,e)+"e"+v(this.e,e):this.layer<=5?(-1===this.sign?"-":"")+"e".repeat(this.layer)+v(this.mag,e):(-1===this.sign?"-":"")+"(e^"+this.layer+")"+v(this.mag,e)}},{key:"abs",value:function(){return c(0===this.sign?0:1,this.layer,this.mag)}},{key:"neg",value:function(){return c(-this.sign,this.layer,this.mag)}},{key:"negate",value:function(){return this.neg()}},{key:"negated",value:function(){return this.neg()}},{key:"sgn",value:function(){return this.sign}},{key:"round",value:function(){return this.mag<0?c(0,0,0):0===this.layer?m(this.sign,0,Math.round(this.mag)):new t(this)}},{key:"floor",value:function(){return this.mag<0?-1===this.sign?c(-1,0,1):c(0,0,0):-1===this.sign?this.neg().ceil().neg():0===this.layer?m(this.sign,0,Math.floor(this.mag)):new t(this)}},{key:"ceil",value:function(){return this.mag<0?1===this.sign?c(1,0,1):c(0,0,0):-1===this.sign?this.neg().floor().neg():0===this.layer?m(this.sign,0,Math.ceil(this.mag)):new t(this)}},{key:"trunc",value:function(){return this.mag<0?c(0,0,0):0===this.layer?m(this.sign,0,Math.trunc(this.mag)):new t(this)}},{key:"add",value:function(e){var i,r,n=f(e);if(this.eq(t.dInf)&&n.eq(t.dNegInf)||this.eq(t.dNegInf)&&n.eq(t.dInf))return new t(t.dNaN);if(!Number.isFinite(this.layer))return new t(this);if(!Number.isFinite(n.layer))return new t(n);if(0===this.sign)return new t(n);if(0===n.sign)return new t(this);if(this.sign===-n.sign&&this.layer===n.layer&&this.mag===n.mag)return c(0,0,0);if(this.layer>=2||n.layer>=2)return this.maxabs(n);if(t.cmpabs(this,n)>0?(i=new t(this),r=new t(n)):(i=new t(n),r=new t(this)),0===i.layer&&0===r.layer)return t.fromNumber(i.sign*i.mag+r.sign*r.mag);var a=i.layer*Math.sign(i.mag),s=r.layer*Math.sign(r.mag);if(a-s>=2)return i;if(0===a&&-1===s){if(Math.abs(r.mag-Math.log10(i.mag))>17)return i;var u=Math.pow(10,Math.log10(i.mag)-r.mag),o=r.sign+i.sign*u;return m(Math.sign(o),1,r.mag+Math.log10(Math.abs(o)))}if(1===a&&0===s){if(Math.abs(i.mag-Math.log10(r.mag))>17)return i;var l=Math.pow(10,i.mag-Math.log10(r.mag)),h=r.sign+i.sign*l;return m(Math.sign(h),1,Math.log10(r.mag)+Math.log10(Math.abs(h)))}if(Math.abs(i.mag-r.mag)>17)return i;var g=Math.pow(10,i.mag-r.mag),v=r.sign+i.sign*g;return m(Math.sign(v),1,r.mag+Math.log10(Math.abs(v)))}},{key:"plus",value:function(e){return this.add(e)}},{key:"sub",value:function(e){return this.add(f(e).neg())}},{key:"subtract",value:function(e){return this.sub(e)}},{key:"minus",value:function(e){return this.sub(e)}},{key:"mul",value:function(e){var i,r,n=f(e);if(this.eq(t.dInf)&&n.eq(t.dNegInf)||this.eq(t.dNegInf)&&n.eq(t.dInf))return new t(t.dNegInf);if(this.mag==Number.POSITIVE_INFINITY&&n.eq(t.dZero)||this.eq(t.dZero)&&this.mag==Number.POSITIVE_INFINITY)return new t(t.dNaN);if(this.eq(t.dNegInf)&&n.eq(t.dNegInf))return new t(t.dInf);if(!Number.isFinite(this.layer))return new t(this);if(!Number.isFinite(n.layer))return new t(n);if(0===this.sign||0===n.sign)return c(0,0,0);if(this.layer===n.layer&&this.mag===-n.mag)return c(this.sign*n.sign,0,1);if(this.layer>n.layer||this.layer==n.layer&&Math.abs(this.mag)>Math.abs(n.mag)?(i=new t(this),r=new t(n)):(i=new t(n),r=new t(this)),0===i.layer&&0===r.layer)return t.fromNumber(i.sign*r.sign*i.mag*r.mag);if(i.layer>=3||i.layer-r.layer>=2)return m(i.sign*r.sign,i.layer,i.mag);if(1===i.layer&&0===r.layer)return m(i.sign*r.sign,1,i.mag+Math.log10(r.mag));if(1===i.layer&&1===r.layer)return m(i.sign*r.sign,1,i.mag+r.mag);if(2===i.layer&&1===r.layer){var a=m(Math.sign(i.mag),i.layer-1,Math.abs(i.mag)).add(m(Math.sign(r.mag),r.layer-1,Math.abs(r.mag)));return m(i.sign*r.sign,a.layer+1,a.sign*a.mag)}if(2===i.layer&&2===r.layer){var s=m(Math.sign(i.mag),i.layer-1,Math.abs(i.mag)).add(m(Math.sign(r.mag),r.layer-1,Math.abs(r.mag)));return m(i.sign*r.sign,s.layer+1,s.sign*s.mag)}throw Error("Bad arguments to mul: "+this+", "+e)}},{key:"multiply",value:function(e){return this.mul(e)}},{key:"times",value:function(e){return this.mul(e)}},{key:"div",value:function(e){var t=f(e);return this.mul(t.recip())}},{key:"divide",value:function(e){return this.div(e)}},{key:"divideBy",value:function(e){return this.div(e)}},{key:"dividedBy",value:function(e){return this.div(e)}},{key:"recip",value:function(){return 0===this.mag?new t(t.dNaN):this.mag===Number.POSITIVE_INFINITY?c(0,0,0):0===this.layer?m(this.sign,0,1/this.mag):m(this.sign,this.layer,-this.mag)}},{key:"reciprocal",value:function(){return this.recip()}},{key:"reciprocate",value:function(){return this.recip()}},{key:"mod",value:function(e){var i=arguments.length>1&&void 0!==arguments[1]&&arguments[1],r=f(e),n=r.abs();if(this.eq(t.dZero)||n.eq(t.dZero))return c(0,0,0);if(i){var a=this.abs().mod(n);return-1==this.sign!=(-1==r.sign)&&(a=r.abs().sub(a)),a.mul(r.sign)}var s=this.toNumber(),u=n.toNumber();return isFinite(s)&&isFinite(u)&&0!=s&&0!=u?new t(s%u):this.sub(n).eq(this)?c(0,0,0):n.sub(this).eq(n)?new t(this):-1==this.sign?this.abs().mod(n).neg():this.sub(this.div(n).floor().mul(n))}},{key:"modulo",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]&&arguments[1];return this.mod(e,t)}},{key:"modular",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]&&arguments[1];return this.mod(e,t)}},{key:"cmp",value:function(e){var t=f(e);return this.sign>t.sign?1:this.sign<t.sign?-1:this.sign*this.cmpabs(e)}},{key:"cmpabs",value:function(e){var t=f(e),i=this.mag>0?this.layer:-this.layer,r=t.mag>0?t.layer:-t.layer;return i>r?1:i<r?-1:this.mag>t.mag?1:this.mag<t.mag?-1:0}},{key:"compare",value:function(e){return this.cmp(e)}},{key:"isNan",value:function(){return isNaN(this.sign)||isNaN(this.layer)||isNaN(this.mag)}},{key:"isFinite",value:function(e){function t(){return e.apply(this,arguments)}return t.toString=function(){return e.toString()},t}((function(){return isFinite(this.sign)&&isFinite(this.layer)&&isFinite(this.mag)}))},{key:"eq",value:function(e){var t=f(e);return this.sign===t.sign&&this.layer===t.layer&&this.mag===t.mag}},{key:"equals",value:function(e){return this.eq(e)}},{key:"neq",value:function(e){return!this.eq(e)}},{key:"notEquals",value:function(e){return this.neq(e)}},{key:"lt",value:function(e){return-1===this.cmp(e)}},{key:"lte",value:function(e){return!this.gt(e)}},{key:"gt",value:function(e){return 1===this.cmp(e)}},{key:"gte",value:function(e){return!this.lt(e)}},{key:"max",value:function(e){var i=f(e);return this.lt(i)?new t(i):new t(this)}},{key:"min",value:function(e){var i=f(e);return this.gt(i)?new t(i):new t(this)}},{key:"maxabs",value:function(e){var i=f(e);return this.cmpabs(i)<0?new t(i):new t(this)}},{key:"minabs",value:function(e){var i=f(e);return this.cmpabs(i)>0?new t(i):new t(this)}},{key:"clamp",value:function(e,t){return this.max(e).min(t)}},{key:"clampMin",value:function(e){return this.max(e)}},{key:"clampMax",value:function(e){return this.min(e)}},{key:"cmp_tolerance",value:function(e,t){var i=f(e);return this.eq_tolerance(i,t)?0:this.cmp(i)}},{key:"compare_tolerance",value:function(e,t){return this.cmp_tolerance(e,t)}},{key:"eq_tolerance",value:function(e,t){var i=f(e);if(null==t&&(t=1e-7),this.sign!==i.sign)return!1;if(Math.abs(this.layer-i.layer)>1)return!1;var r=this.mag,n=i.mag;return this.layer>i.layer&&(n=y(n)),this.layer<i.layer&&(r=y(r)),Math.abs(r-n)<=t*Math.max(Math.abs(r),Math.abs(n))}},{key:"equals_tolerance",value:function(e,t){return this.eq_tolerance(e,t)}},{key:"neq_tolerance",value:function(e,t){return!this.eq_tolerance(e,t)}},{key:"notEquals_tolerance",value:function(e,t){return this.neq_tolerance(e,t)}},{key:"lt_tolerance",value:function(e,t){var i=f(e);return!this.eq_tolerance(i,t)&&this.lt(i)}},{key:"lte_tolerance",value:function(e,t){var i=f(e);return this.eq_tolerance(i,t)||this.lt(i)}},{key:"gt_tolerance",value:function(e,t){var i=f(e);return!this.eq_tolerance(i,t)&&this.gt(i)}},{key:"gte_tolerance",value:function(e,t){var i=f(e);return this.eq_tolerance(i,t)||this.gt(i)}},{key:"pLog10",value:function(){return this.lt(t.dZero)?c(0,0,0):this.log10()}},{key:"absLog10",value:function(){return 0===this.sign?new t(t.dNaN):this.layer>0?m(Math.sign(this.mag),this.layer-1,Math.abs(this.mag)):m(1,0,Math.log10(this.mag))}},{key:"log10",value:function(){return this.sign<=0?new t(t.dNaN):this.layer>0?m(Math.sign(this.mag),this.layer-1,Math.abs(this.mag)):m(this.sign,0,Math.log10(this.mag))}},{key:"log",value:function(e){return e=f(e),this.sign<=0||e.sign<=0||1===e.sign&&0===e.layer&&1===e.mag?new t(t.dNaN):0===this.layer&&0===e.layer?m(this.sign,0,Math.log(this.mag)/Math.log(e.mag)):t.div(this.log10(),e.log10())}},{key:"log2",value:function(){return this.sign<=0?new t(t.dNaN):0===this.layer?m(this.sign,0,Math.log2(this.mag)):1===this.layer?m(Math.sign(this.mag),0,3.321928094887362*Math.abs(this.mag)):2===this.layer?m(Math.sign(this.mag),1,Math.abs(this.mag)+.5213902276543247):m(Math.sign(this.mag),this.layer-1,Math.abs(this.mag))}},{key:"ln",value:function(){return this.sign<=0?new t(t.dNaN):0===this.layer?m(this.sign,0,Math.log(this.mag)):1===this.layer?m(Math.sign(this.mag),0,2.302585092994046*Math.abs(this.mag)):2===this.layer?m(Math.sign(this.mag),1,Math.abs(this.mag)+.36221568869946325):m(Math.sign(this.mag),this.layer-1,Math.abs(this.mag))}},{key:"logarithm",value:function(e){return this.log(e)}},{key:"pow",value:function(e){var i=f(e),r=new t(this),n=new t(i);if(0===r.sign)return n.eq(0)?c(1,0,1):r;if(1===r.sign&&0===r.layer&&1===r.mag)return r;if(0===n.sign)return c(1,0,1);if(1===n.sign&&0===n.layer&&1===n.mag)return r;var a=r.absLog10().mul(n).pow10();return-1===this.sign?Math.abs(n.toNumber()%2)%2==1?a.neg():Math.abs(n.toNumber()%2)%2==0?a:new t(t.dNaN):a}},{key:"pow10",value:function(){if(this.eq(t.dInf))return new t(t.dInf);if(this.eq(t.dNegInf))return c(0,0,0);if(!Number.isFinite(this.layer)||!Number.isFinite(this.mag))return new t(t.dNaN);var e=new t(this);if(0===e.layer){var i=Math.pow(10,e.sign*e.mag);if(Number.isFinite(i)&&Math.abs(i)>=.1)return m(1,0,i);if(0===e.sign)return c(1,0,1);e=c(e.sign,e.layer+1,Math.log10(e.mag))}return e.sign>0&&e.mag>=0?m(e.sign,e.layer+1,e.mag):e.sign<0&&e.mag>=0?m(-e.sign,e.layer+1,-e.mag):c(1,0,1)}},{key:"pow_base",value:function(e){return f(e).pow(this)}},{key:"root",value:function(e){var t=f(e);return this.lt(0)&&t.mod(2,!0).eq(1)?this.neg().root(t).neg():this.pow(t.recip())}},{key:"factorial",value:function(){return this.mag<0||0===this.layer?this.add(1).gamma():1===this.layer?t.exp(t.mul(this,t.ln(this).sub(1))):t.exp(this)}},{key:"gamma",value:function(){if(this.mag<0)return this.recip();if(0===this.layer){if(this.lt(c(1,0,24)))return t.fromNumber(function(e){if(!isFinite(e))return e;if(e<-50)return e===Math.trunc(e)?Number.NEGATIVE_INFINITY:0;for(var t=1;e<10;)t*=e,++e;var i=.9189385332046727;i+=((e-=1)+.5)*Math.log(e),i-=e;var r=e*e,n=e;return i+=1/(12*n),i-=1/(360*(n*=r)),i+=1/(1260*(n*=r)),i-=1/(1680*(n*=r)),i+=1/(1188*(n*=r)),i-=691/(360360*(n*=r)),i+=7/(1092*(n*=r)),i-=3617/(122400*(n*=r)),Math.exp(i)/t}(this.sign*this.mag));var e=this.mag-1,i=.9189385332046727;i+=(e+.5)*Math.log(e);var r=e*e,n=e,a=12*n,s=1/a,u=(i-=e)+s;if(u===i)return t.exp(i);if((u=(i=u)-(s=1/(a=360*(n*=r))))===i)return t.exp(i);i=u;var o=1/(a=1260*(n*=r));return i+=o,i-=o=1/(a=1680*(n*=r)),t.exp(i)}return 1===this.layer?t.exp(t.mul(this,t.ln(this).sub(1))):t.exp(this)}},{key:"lngamma",value:function(){return this.gamma().ln()}},{key:"exp",value:function(){return this.mag<0?c(1,0,1):0===this.layer&&this.mag<=709.7?t.fromNumber(Math.exp(this.sign*this.mag)):0===this.layer?m(1,1,this.sign*Math.log10(Math.E)*this.mag):1===this.layer?m(1,2,this.sign*(Math.log10(.4342944819032518)+this.mag)):m(1,this.layer+1,this.sign*this.mag)}},{key:"sqr",value:function(){return this.pow(2)}},{key:"sqrt",value:function(){if(0===this.layer)return t.fromNumber(Math.sqrt(this.sign*this.mag));if(1===this.layer)return m(1,2,Math.log10(this.mag)-.3010299956639812);var e=t.div(c(this.sign,this.layer-1,this.mag),c(1,0,2));return e.layer+=1,e.normalize(),e}},{key:"cube",value:function(){return this.pow(3)}},{key:"cbrt",value:function(){return this.lt(0)?this.neg().pow(1/3).neg():this.pow(1/3)}},{key:"tetrate",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:2,i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:c(1,0,1),r=arguments.length>2&&void 0!==arguments[2]&&arguments[2];if(1===e)return t.pow(this,i);if(0===e)return new t(i);if(this.eq(t.dOne))return c(1,0,1);if(this.eq(-1))return t.pow(this,i);if(e===Number.POSITIVE_INFINITY){var n=this.toNumber();if(n<=1.444667861009766&&n>=.06598803584531254){var a=t.ln(this).neg(),s=a.lambertw().div(a);if(n<1)return s;var u=a.lambertw(!1).div(a);return n>1.444667861009099&&(s=u=t.fromNumber(Math.E)),(i=f(i)).eq(u)?u:i.lt(u)?s:new t(t.dInf)}return new t(n>1.444667861009766?t.dInf:t.dNaN)}if(this.eq(t.dZero)){var o=Math.abs((e+1)%2);return o>1&&(o=2-o),t.fromNumber(o)}if(e<0)return t.iteratedlog(i,this,-e,r);i=new t(i);var l=e,h=l-(e=Math.trunc(e));if(this.gt(t.dZero)&&(this.lt(1)||this.lte(1.444667861009766)&&i.lte(t.ln(this).neg().lambertw(!1).div(t.ln(this).neg())))&&(l>1e4||!r)){var g=Math.min(1e4,e);i=i.eq(t.dOne)?this.pow(h):this.lt(1)?i.pow(1-h).mul(this.pow(i).pow(h)):i.layeradd(h,this);for(var m=0;m<g;++m){var v=i;if(i=this.pow(i),v.eq(i))return i}return l>1e4&&Math.ceil(l)%2==1?this.pow(i):i}0!==h&&(i.eq(t.dOne)?this.gt(10)||r?i=this.pow(h):(i=t.fromNumber(t.tetrate_critical(this.toNumber(),h)),this.lt(2)&&(i=i.sub(1).mul(this.minus(1)).plus(1))):i=this.eq(10)?i.layeradd10(h,r):this.lt(1)?i.pow(1-h).mul(this.pow(i).pow(h)):i.layeradd(h,this,r));for(var y=0;y<e;++y){if(i=this.pow(i),!isFinite(i.layer)||!isFinite(i.mag))return i.normalize();if(i.layer-this.layer>3)return c(i.sign,i.layer+(e-y-1),i.mag);if(y>1e4)return i}return i}},{key:"iteratedexp",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:2,t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:c(1,0,1),i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return this.tetrate(e,t,i)}},{key:"iteratedlog",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:10,i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:1,r=arguments.length>2&&void 0!==arguments[2]&&arguments[2];if(i<0)return t.tetrate(e,-i,this,r);e=f(e);var n=t.fromDecimal(this),a=i,s=a-(i=Math.trunc(i));if(n.layer-e.layer>3){var u=Math.min(i,n.layer-e.layer-3);i-=u,n.layer-=u}for(var o=0;o<i;++o){if(n=n.log(e),!isFinite(n.layer)||!isFinite(n.mag))return n.normalize();if(o>1e4)return n}return s>0&&s<1&&(n=e.eq(10)?n.layeradd10(-s,r):n.layeradd(-s,e,r)),n}},{key:"slog",value:function(){for(var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:10,i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:100,r=arguments.length>2&&void 0!==arguments[2]&&arguments[2],n=.001,a=!1,s=!1,u=this.slog_internal(e,r).toNumber(),o=1;o<i;++o){var l=new t(e).tetrate(u,t.dOne,r),h=l.gt(this);if(o>1&&s!=h&&(a=!0),s=h,a?n/=2:n*=2,u+=n=Math.abs(n)*(h?-1:1),0===n)break}return t.fromNumber(u)}},{key:"slog_internal",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:10,i=arguments.length>1&&void 0!==arguments[1]&&arguments[1];if((e=f(e)).lte(t.dZero))return new t(t.dNaN);if(e.eq(t.dOne))return new t(t.dNaN);if(e.lt(t.dOne))return this.eq(t.dOne)?c(0,0,0):this.eq(t.dZero)?c(-1,0,1):new t(t.dNaN);if(this.mag<0||this.eq(t.dZero))return c(-1,0,1);if(e.lt(1.444667861009766)){var r=t.ln(e).neg(),n=r.lambertw().div(r);if(this.eq(n))return new t(t.dInf);if(this.gt(n))return new t(t.dNaN)}var a=0,s=t.fromDecimal(this);if(s.layer-e.layer>3){var u=s.layer-e.layer-3;a+=u,s.layer-=u}for(var o=0;o<100;++o)if(s.lt(t.dZero))s=t.pow(e,s),a-=1;else{if(s.lte(t.dOne))return i?t.fromNumber(a+s.toNumber()-1):t.fromNumber(a+t.slog_critical(e.toNumber(),s.toNumber()));a+=1,s=t.log(s,e)}return t.fromNumber(a)}},{key:"layeradd10",value:function(e){var i=arguments.length>1&&void 0!==arguments[1]&&arguments[1];e=t.fromValue_noAlloc(e).toNumber();var r=t.fromDecimal(this);if(e>=1){r.mag<0&&r.layer>0?(r.sign=0,r.mag=0,r.layer=0):-1===r.sign&&0==r.layer&&(r.sign=1,r.mag=-r.mag);var n=Math.trunc(e);e-=n,r.layer+=n}if(e<=-1){var a=Math.trunc(e);if(e-=a,r.layer+=a,r.layer<0)for(var s=0;s<100;++s){if(r.layer++,r.mag=Math.log10(r.mag),!isFinite(r.mag))return 0===r.sign&&(r.sign=1),r.layer<0&&(r.layer=0),r.normalize();if(r.layer>=0)break}}for(;r.layer<0;)r.layer++,r.mag=Math.log10(r.mag);return 0===r.sign&&(r.sign=1,0===r.mag&&r.layer>=1&&(r.layer-=1,r.mag=1)),r.normalize(),0!==e?r.layeradd(e,10,i):r}},{key:"layeradd",value:function(e,i){var r=arguments.length>2&&void 0!==arguments[2]&&arguments[2],n=f(i);if(n.gt(1)&&n.lte(1.444667861009766)){var a=t.excess_slog(this,i,r),s=a[0].toNumber(),u=a[1],o=s+e,l=t.ln(i).neg(),h=l.lambertw().div(l),g=l.lambertw(!1).div(l),m=t.dOne;1==u?m=h.mul(g).sqrt():2==u&&(m=g.mul(2));var c=n.pow(m),v=Math.floor(o),y=o-v,d=m.pow(1-y).mul(c.pow(y));return t.tetrate(n,v,d,r)}var N=this.slog(i,100,r).toNumber(),p=N+e;return p>=0?t.tetrate(i,p,t.dOne,r):Number.isFinite(p)?p>=-1?t.log(t.tetrate(i,p+1,t.dOne,r),i):t.log(t.log(t.tetrate(i,p+2,t.dOne,r),i),i):new t(t.dNaN)}},{key:"lambertw",value:function(){var e=!(arguments.length>0&&void 0!==arguments[0])||arguments[0];return this.lt(-.3678794411710499)?new t(t.dNaN):e?this.abs().lt("1e-300")?new t(this):this.mag<0?t.fromNumber(N(this.toNumber())):0===this.layer?t.fromNumber(N(this.sign*this.mag)):this.lt("eee15")?p(this):this.ln():1===this.sign?new t(t.dNaN):0===this.layer?t.fromNumber(N(this.sign*this.mag,1e-10,!1)):1==this.layer?p(this,1e-10,!1):this.neg().recip().lambertw().neg()}},{key:"ssqrt",value:function(){return this.linear_sroot(2)}},{key:"linear_sroot",value:function(e){if(1==e)return this;if(this.eq(t.dInf))return new t(t.dInf);if(!this.isFinite())return new t(t.dNaN);if(e>0&&e<1)return this.root(e);if(e>-2&&e<-1)return t.fromNumber(e).add(2).pow(this.recip());if(e<=0)return new t(t.dNaN);if(e==Number.POSITIVE_INFINITY){var i=this.toNumber();return i<Math.E&&i>.36787944117144233?this.pow(this.recip()):new t(t.dNaN)}if(this.eq(1))return c(1,0,1);if(this.lt(0))return new t(t.dNaN);if(this.lte("1ee-16"))return new t(e%2==1?this:t.dNaN);if(this.gt(1)){var r=t.dTen;this.gte(t.tetrate(10,e,1,!0))&&(r=this.iteratedlog(10,e-1,!0)),e<=1&&(r=this.root(e));for(var n=t.dZero,a=r.layer,s=r.iteratedlog(10,a,!0),u=s,o=s.div(2),l=!0;l;)o=n.add(s).div(2),t.iteratedexp(10,a,o,!0).tetrate(e,1,!0).gt(this)?s=o:n=o,o.eq(u)?l=!1:u=o;return t.iteratedexp(10,a,o,!0)}for(var h=1,g=m(1,10,1),f=m(1,10,1),v=m(1,10,1),y=m(1,1,-16),d=t.dZero,N=m(1,10,1),p=y.pow10().recip(),b=t.dZero,k=p,w=p,M=Math.ceil(e)%2==0,I=0,_=m(1,10,1),q=!1,F=t.dZero,S=!1;h<4;){if(2==h){if(M)break;v=m(1,10,1),y=g,h=3,N=m(1,10,1),_=m(1,10,1)}for(q=!1;y.neq(v);){if(F=y,y.pow10().recip().tetrate(e,1,!0).eq(1)&&y.pow10().recip().lt(.4))p=y.pow10().recip(),k=y.pow10().recip(),w=y.pow10().recip(),b=t.dZero,I=-1,3==h&&(_=y);else if(y.pow10().recip().tetrate(e,1,!0).eq(y.pow10().recip())&&!M&&y.pow10().recip().lt(.4))p=y.pow10().recip(),k=y.pow10().recip(),w=y.pow10().recip(),b=t.dZero,I=0;else if(y.pow10().recip().tetrate(e,1,!0).eq(y.pow10().recip().mul(2).tetrate(e,1,!0)))p=y.pow10().recip(),k=t.dZero,w=p.mul(2),b=p,I=M?-1:0;else{for(d=y.mul(12e-17),p=y.pow10().recip(),k=y.add(d).pow10().recip(),b=p.sub(k),w=p.add(b);k.tetrate(e,1,!0).eq(p.tetrate(e,1,!0))||w.tetrate(e,1,!0).eq(p.tetrate(e,1,!0))||k.gte(p)||w.lte(p);)d=d.mul(2),k=y.add(d).pow10().recip(),b=p.sub(k),w=p.add(b);if((1==h&&w.tetrate(e,1,!0).gt(p.tetrate(e,1,!0))&&k.tetrate(e,1,!0).gt(p.tetrate(e,1,!0))||3==h&&w.tetrate(e,1,!0).lt(p.tetrate(e,1,!0))&&k.tetrate(e,1,!0).lt(p.tetrate(e,1,!0)))&&(_=y),w.tetrate(e,1,!0).lt(p.tetrate(e,1,!0)))I=-1;else if(M)I=1;else if(3==h&&y.gt_tolerance(g,1e-8))I=0;else{for(;k.tetrate(e,1,!0).eq_tolerance(p.tetrate(e,1,!0),1e-8)||w.tetrate(e,1,!0).eq_tolerance(p.tetrate(e,1,!0),1e-8)||k.gte(p)||w.lte(p);)d=d.mul(2),k=y.add(d).pow10().recip(),b=p.sub(k),w=p.add(b);I=w.tetrate(e,1,!0).sub(p.tetrate(e,1,!0)).lt(p.tetrate(e,1,!0).sub(k.tetrate(e,1,!0)))?0:1}}if(-1==I&&(S=!0),1==h&&1==I||3==h&&0!=I)if(v.eq(m(1,10,1)))y=y.mul(2);else{var x=!1;if(q&&(1==I&&1==h||-1==I&&3==h)&&(x=!0),y=y.add(v).div(2),x)break}else if(v.eq(m(1,10,1)))v=y,y=y.div(2);else{var E=!1;if(q&&(1==I&&1==h||-1==I&&3==h)&&(E=!0),v=v.sub(N),y=y.sub(N),E)break}if(v.sub(y).div(2).abs().gt(N.mul(1.5))&&(q=!0),N=v.sub(y).div(2).abs(),y.gt("1e18"))break;if(y.eq(F))break}if(y.gt("1e18"))break;if(!S)break;if(_==m(1,10,1))break;1==h?g=_:3==h&&(f=_),h++}v=g;for(var T=y=m(1,1,-18),O=t.dZero,C=!0;C;)if(O=v.eq(m(1,10,1))?y.mul(2):v.add(y).div(2),t.pow(10,O).recip().tetrate(e,1,!0).gt(this)?y=O:v=O,O.eq(T)?C=!1:T=O,y.gt("1e18"))return new t(t.dNaN);if(O.eq_tolerance(g,1e-15)){if(f.eq(m(1,10,1)))return new t(t.dNaN);for(v=m(1,10,1),T=y=f,O=t.dZero,C=!0;C;)if(O=v.eq(m(1,10,1))?y.mul(2):v.add(y).div(2),t.pow(10,O).recip().tetrate(e,1,!0).gt(this)?y=O:v=O,O.eq(T)?C=!1:T=O,y.gt("1e18"))return new t(t.dNaN);return O.pow10().recip()}return O.pow10().recip()}},{key:"pentate",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:2,i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:c(1,0,1),r=arguments.length>2&&void 0!==arguments[2]&&arguments[2];i=new t(i);var n=e,a=n-(e=Math.floor(e)),s=t.dZero,u=t.dZero;if(0!==a){if(!i.eq(t.dOne))return this.pentate(i.penta_log(this,void 0,r).plus(n).toNumber(),1,r);++e,i=t.fromNumber(a)}if(e>0)for(var o=0;o<e;){if(u=s,s=i,i=this.tetrate(i.toNumber(),t.dOne,r),++o,this.gt(0)&&this.lte(1)&&i.gt(0)&&i.lte(1))return this.tetrate(e-o,i,r);if(i.eq(s)||i.eq(u)&&o%2==e%2)return i.normalize();if(!isFinite(i.layer)||!isFinite(i.mag))return i.normalize();if(o>1e4)return i}else for(var l=0;l<-e;++l){if(s=i,(i=i.slog(this,void 0,r)).eq(s))return i.normalize();if(!isFinite(i.layer)||!isFinite(i.mag))return i.normalize();if(l>100)return i}return i}},{key:"penta_log",value:function(){var e=arguments.length>0&&void 0!==arguments[0]?arguments[0]:10,i=arguments.length>1&&void 0!==arguments[1]?arguments[1]:100,r=arguments.length>2&&void 0!==arguments[2]&&arguments[2];if((e=new t(e)).lte(1))return new t(t.dNaN);if(this.eq(1))return c(0,0,0);if(this.eq(t.dInf))return new t(t.dInf);var n=new t(1),a=0,s=1;if(this.lt(-1)){if(this.lte(-2))return new t(t.dNaN);var u=e.tetrate(this.toNumber(),1,r);if(this.eq(u))return new t(t.dNegInf);if(this.gt(u))return new t(t.dNaN)}if(this.gt(1)){for(;n.lt(this);)if(a++,n=t.tetrate(e,n.toNumber(),1,r),a>1e3)return new t(t.dNaN)}else for(;n.gt(this);)if(a--,n=t.slog(n,e,r),a>100)return new t(t.dNaN);for(var o=1;o<i;++o){var l=e.pentate(a,t.dOne,r);if(l.eq(this))break;var h=l.gt(this);if(a+=s=Math.abs(s)*(h?-1:1),0===(s/=2))break}return t.fromNumber(a)}},{key:"linear_penta_root",value:function(e){return 1==e?this:e<0?new t(t.dNaN):this.eq(t.dInf)?new t(t.dInf):this.isFinite()?e>0&&e<1?this.root(e):this.eq(1)?c(1,0,1):this.lt(0)?new t(t.dNaN):this.lt(1)?this.linear_sroot(e):t.increasingInverse((function(i){return t.pentate(i,e,1,!0)}))(this):new t(t.dNaN)}},{key:"sin",value:function(){return this.mag<0?new t(this):0===this.layer?t.fromNumber(Math.sin(this.sign*this.mag)):c(0,0,0)}},{key:"cos",value:function(){return this.mag<0?c(1,0,1):0===this.layer?t.fromNumber(Math.cos(this.sign*this.mag)):c(0,0,0)}},{key:"tan",value:function(){return this.mag<0?new t(this):0===this.layer?t.fromNumber(Math.tan(this.sign*this.mag)):c(0,0,0)}},{key:"asin",value:function(){return this.mag<0?new t(this):0===this.layer?t.fromNumber(Math.asin(this.sign*this.mag)):new t(t.dNaN)}},{key:"acos",value:function(){return this.mag<0?t.fromNumber(Math.acos(this.toNumber())):0===this.layer?t.fromNumber(Math.acos(this.sign*this.mag)):new t(t.dNaN)}},{key:"atan",value:function(){return this.mag<0?new t(this):0===this.layer?t.fromNumber(Math.atan(this.sign*this.mag)):t.fromNumber(Math.atan(Infinity*this.sign))}},{key:"sinh",value:function(){return this.exp().sub(this.negate().exp()).div(2)}},{key:"cosh",value:function(){return this.exp().add(this.negate().exp()).div(2)}},{key:"tanh",value:function(){return this.sinh().div(this.cosh())}},{key:"asinh",value:function(){return t.ln(this.add(this.sqr().add(1).sqrt()))}},{key:"acosh",value:function(){return t.ln(this.add(this.sqr().sub(1).sqrt()))}},{key:"atanh",value:function(){return this.abs().gte(1)?new t(t.dNaN):t.ln(this.add(1).div(t.fromNumber(1).sub(this))).div(2)}},{key:"ascensionPenalty",value:function(e){return 0===e?new t(this):this.root(t.pow(10,e))}},{key:"egg",value:function(){return this.add(9)}},{key:"lessThanOrEqualTo",value:function(e){return this.cmp(e)<1}},{key:"lessThan",value:function(e){return this.cmp(e)<0}},{key:"greaterThanOrEqualTo",value:function(e){return this.cmp(e)>-1}},{key:"greaterThan",value:function(e){return this.cmp(e)>0}}],[{key:"fromComponents",value:function(e,i,r){return(new t).fromComponents(e,i,r)}},{key:"fromComponents_noNormalize",value:function(e,i,r){return(new t).fromComponents_noNormalize(e,i,r)}},{key:"fromMantissaExponent",value:function(e,i){return(new t).fromMantissaExponent(e,i)}},{key:"fromMantissaExponent_noNormalize",value:function(e,i){return(new t).fromMantissaExponent_noNormalize(e,i)}},{key:"fromDecimal",value:function(e){return(new t).fromDecimal(e)}},{key:"fromNumber",value:function(e){return(new t).fromNumber(e)}},{key:"fromString",value:function(e){var i=arguments.length>1&&void 0!==arguments[1]&&arguments[1];return(new t).fromString(e,i)}},{key:"fromValue",value:function(e){return(new t).fromValue(e)}},{key:"fromValue_noAlloc",value:function(e){if(e instanceof t)return e;if("string"==typeof e){var i=t.fromStringCache.get(e);return void 0!==i?i:t.fromString(e)}return"number"==typeof e?t.fromNumber(e):c(0,0,0)}},{key:"abs",value:function(e){return f(e).abs()}},{key:"neg",value:function(e){return f(e).neg()}},{key:"negate",value:function(e){return f(e).neg()}},{key:"negated",value:function(e){return f(e).neg()}},{key:"sign",value:function(e){return f(e).sign}},{key:"sgn",value:function(e){return f(e).sign}},{key:"round",value:function(e){return f(e).round()}},{key:"floor",value:function(e){return f(e).floor()}},{key:"ceil",value:function(e){return f(e).ceil()}},{key:"trunc",value:function(e){return f(e).trunc()}},{key:"add",value:function(e,t){return f(e).add(t)}},{key:"plus",value:function(e,t){return f(e).add(t)}},{key:"sub",value:function(e,t){return f(e).sub(t)}},{key:"subtract",value:function(e,t){return f(e).sub(t)}},{key:"minus",value:function(e,t){return f(e).sub(t)}},{key:"mul",value:function(e,t){return f(e).mul(t)}},{key:"multiply",value:function(e,t){return f(e).mul(t)}},{key:"times",value:function(e,t){return f(e).mul(t)}},{key:"div",value:function(e,t){return f(e).div(t)}},{key:"divide",value:function(e,t){return f(e).div(t)}},{key:"recip",value:function(e){return f(e).recip()}},{key:"reciprocal",value:function(e){return f(e).recip()}},{key:"reciprocate",value:function(e){return f(e).reciprocate()}},{key:"mod",value:function(e,t){var i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return f(e).mod(t,i)}},{key:"modulo",value:function(e,t){var i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return f(e).modulo(t,i)}},{key:"modular",value:function(e,t){var i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return f(e).modular(t,i)}},{key:"cmp",value:function(e,t){return f(e).cmp(t)}},{key:"cmpabs",value:function(e,t){return f(e).cmpabs(t)}},{key:"compare",value:function(e,t){return f(e).cmp(t)}},{key:"isNaN",value:function(e){function t(t){return e.apply(this,arguments)}return t.toString=function(){return e.toString()},t}((function(e){return e=f(e),isNaN(e.sign)||isNaN(e.layer)||isNaN(e.mag)}))},{key:"isFinite",value:function(e){function t(t){return e.apply(this,arguments)}return t.toString=function(){return e.toString()},t}((function(e){return e=f(e),isFinite(e.sign)&&isFinite(e.layer)&&isFinite(e.mag)}))},{key:"eq",value:function(e,t){return f(e).eq(t)}},{key:"equals",value:function(e,t){return f(e).eq(t)}},{key:"neq",value:function(e,t){return f(e).neq(t)}},{key:"notEquals",value:function(e,t){return f(e).notEquals(t)}},{key:"lt",value:function(e,t){return f(e).lt(t)}},{key:"lte",value:function(e,t){return f(e).lte(t)}},{key:"gt",value:function(e,t){return f(e).gt(t)}},{key:"gte",value:function(e,t){return f(e).gte(t)}},{key:"max",value:function(e,t){return f(e).max(t)}},{key:"min",value:function(e,t){return f(e).min(t)}},{key:"minabs",value:function(e,t){return f(e).minabs(t)}},{key:"maxabs",value:function(e,t){return f(e).maxabs(t)}},{key:"clamp",value:function(e,t,i){return f(e).clamp(t,i)}},{key:"clampMin",value:function(e,t){return f(e).clampMin(t)}},{key:"clampMax",value:function(e,t){return f(e).clampMax(t)}},{key:"cmp_tolerance",value:function(e,t,i){return f(e).cmp_tolerance(t,i)}},{key:"compare_tolerance",value:function(e,t,i){return f(e).cmp_tolerance(t,i)}},{key:"eq_tolerance",value:function(e,t,i){return f(e).eq_tolerance(t,i)}},{key:"equals_tolerance",value:function(e,t,i){return f(e).eq_tolerance(t,i)}},{key:"neq_tolerance",value:function(e,t,i){return f(e).neq_tolerance(t,i)}},{key:"notEquals_tolerance",value:function(e,t,i){return f(e).notEquals_tolerance(t,i)}},{key:"lt_tolerance",value:function(e,t,i){return f(e).lt_tolerance(t,i)}},{key:"lte_tolerance",value:function(e,t,i){return f(e).lte_tolerance(t,i)}},{key:"gt_tolerance",value:function(e,t,i){return f(e).gt_tolerance(t,i)}},{key:"gte_tolerance",value:function(e,t,i){return f(e).gte_tolerance(t,i)}},{key:"pLog10",value:function(e){return f(e).pLog10()}},{key:"absLog10",value:function(e){return f(e).absLog10()}},{key:"log10",value:function(e){return f(e).log10()}},{key:"log",value:function(e,t){return f(e).log(t)}},{key:"log2",value:function(e){return f(e).log2()}},{key:"ln",value:function(e){return f(e).ln()}},{key:"logarithm",value:function(e,t){return f(e).logarithm(t)}},{key:"pow",value:function(e,t){return f(e).pow(t)}},{key:"pow10",value:function(e){return f(e).pow10()}},{key:"root",value:function(e,t){return f(e).root(t)}},{key:"factorial",value:function(e,t){return f(e).factorial()}},{key:"gamma",value:function(e,t){return f(e).gamma()}},{key:"lngamma",value:function(e,t){return f(e).lngamma()}},{key:"exp",value:function(e){return f(e).exp()}},{key:"sqr",value:function(e){return f(e).sqr()}},{key:"sqrt",value:function(e){return f(e).sqrt()}},{key:"cube",value:function(e){return f(e).cube()}},{key:"cbrt",value:function(e){return f(e).cbrt()}},{key:"tetrate",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:2,i=arguments.length>2&&void 0!==arguments[2]?arguments[2]:c(1,0,1),r=arguments.length>3&&void 0!==arguments[3]&&arguments[3];return f(e).tetrate(t,i,r)}},{key:"iteratedexp",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:2,i=arguments.length>2&&void 0!==arguments[2]?arguments[2]:c(1,0,1),r=arguments.length>3&&void 0!==arguments[3]&&arguments[3];return f(e).iteratedexp(t,i,r)}},{key:"iteratedlog",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:10,i=arguments.length>2&&void 0!==arguments[2]?arguments[2]:1,r=arguments.length>3&&void 0!==arguments[3]&&arguments[3];return f(e).iteratedlog(t,i,r)}},{key:"layeradd10",value:function(e,t){var i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return f(e).layeradd10(t,i)}},{key:"layeradd",value:function(e,t){var i=arguments.length>2&&void 0!==arguments[2]?arguments[2]:10,r=arguments.length>3&&void 0!==arguments[3]&&arguments[3];return f(e).layeradd(t,i,r)}},{key:"slog",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:10,i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return f(e).slog(t,100,i)}},{key:"lambertw",value:function(e,t){return f(e).lambertw(t)}},{key:"ssqrt",value:function(e){return f(e).ssqrt()}},{key:"linear_sroot",value:function(e,t){return f(e).linear_sroot(t)}},{key:"pentate",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:2,i=arguments.length>2&&void 0!==arguments[2]?arguments[2]:c(1,0,1),r=arguments.length>3&&void 0!==arguments[3]&&arguments[3];return f(e).pentate(t,i,r)}},{key:"penta_log",value:function(e){var t=arguments.length>1&&void 0!==arguments[1]?arguments[1]:10,i=arguments.length>2&&void 0!==arguments[2]&&arguments[2];return f(e).penta_log(t,100,i)}},{key:"linear_penta_root",value:function(e,t){return f(e).linear_penta_root(t)}},{key:"sin",value:function(e){return f(e).sin()}},{key:"cos",value:function(e){return f(e).cos()}},{key:"tan",value:function(e){return f(e).tan()}},{key:"asin",value:function(e){return f(e).asin()}},{key:"acos",value:function(e){return f(e).acos()}},{key:"atan",value:function(e){return f(e).atan()}},{key:"sinh",value:function(e){return f(e).sinh()}},{key:"cosh",value:function(e){return f(e).cosh()}},{key:"tanh",value:function(e){return f(e).tanh()}},{key:"asinh",value:function(e){return f(e).asinh()}},{key:"acosh",value:function(e){return f(e).acosh()}},{key:"atanh",value:function(e){return f(e).atanh()}},{key:"affordGeometricSeries",value:function(e,t,i,r){return this.affordGeometricSeries_core(f(e),f(t),f(i),r)}},{key:"sumGeometricSeries",value:function(e,t,i,r){return this.sumGeometricSeries_core(e,f(t),f(i),r)}},{key:"affordArithmeticSeries",value:function(e,t,i,r){return this.affordArithmeticSeries_core(f(e),f(t),f(i),f(r))}},{key:"sumArithmeticSeries",value:function(e,t,i,r){return this.sumArithmeticSeries_core(f(e),f(t),f(i),f(r))}},{key:"efficiencyOfPurchase",value:function(e,t,i){return this.efficiencyOfPurchase_core(f(e),f(t),f(i))}},{key:"randomDecimalForTesting",value:function(e){if(20*Math.random()<1)return c(0,0,0);var t=Math.random()>.5?1:-1;if(20*Math.random()<1)return c(t,0,1);var i=Math.floor(Math.random()*(e+1)),r=0===i?616*Math.random()-308:16*Math.random();Math.random()>.9&&(r=Math.trunc(r));var n=Math.pow(10,r);return Math.random()>.9&&(n=Math.trunc(n)),m(t,i,n)}},{key:"affordGeometricSeries_core",value:function(e,i,r,n){var a=i.mul(r.pow(n));return t.floor(e.div(a).mul(r.sub(1)).add(1).log10().div(r.log10()))}},{key:"sumGeometricSeries_core",value:function(e,i,r,n){return i.mul(r.pow(n)).mul(t.sub(1,r.pow(e))).div(t.sub(1,r))}},{key:"affordArithmeticSeries_core",value:function(e,t,i,r){var n=t.add(r.mul(i)).sub(i.div(2)),a=n.pow(2);return n.neg().add(a.add(i.mul(e).mul(2)).sqrt()).div(i).floor()}},{key:"sumArithmeticSeries_core",value:function(e,t,i,r){var n=t.add(r.mul(i));return e.div(2).mul(n.mul(2).plus(e.sub(1).mul(i)))}},{key:"efficiencyOfPurchase_core",value:function(e,t,i){return e.div(t).add(e.div(i))}},{key:"slog_critical",value:function(e,i){return e>10?i-1:t.critical_section(e,i,g)}},{key:"tetrate_critical",value:function(e,i){return t.critical_section(e,i,h)}},{key:"critical_section",value:function(e,t,i){(t*=10)<0&&(t=0),t>10&&(t=10),e<2&&(e=2),e>10&&(e=10);for(var r=0,n=0,a=0;a<l.length;++a){if(l[a]==e){r=i[a][Math.floor(t)],n=i[a][Math.ceil(t)];break}if(l[a]<e&&l[a+1]>e){var s=(e-l[a])/(l[a+1]-l[a]);r=i[a][Math.floor(t)]*(1-s)+i[a+1][Math.floor(t)]*s,n=i[a][Math.ceil(t)]*(1-s)+i[a+1][Math.ceil(t)]*s;break}}var u=t-Math.floor(t);return r<=0||n<=0?r*(1-u)+n*u:Math.pow(e,Math.log(r)/Math.log(e)*(1-u)+Math.log(n)/Math.log(e)*u)}},{key:"excess_slog",value:function(e,i){var r=arguments.length>2&&void 0!==arguments[2]&&arguments[2];e=f(e);var n=i=f(i);if(1==(i=i.toNumber())||i<=0)return[new t(t.dNaN),0];if(i>1.444667861009766)return[e.slog(i,100,r),0];var a=t.ln(i).neg(),s=a.lambertw().div(a),u=t.dInf;if(i>1&&(u=a.lambertw(!1).div(a)),i>1.444667861009099&&(s=u=t.fromNumber(Math.E)),e.lt(s))return[e.slog(i,100,r),0];if(e.eq(s))return[new t(t.dInf),0];if(e.eq(u))return[new t(t.dNegInf),2];if(e.gt(u)){var o=u.mul(2),l=n.pow(o),h=0;if(e.gte(o)&&e.lt(l))h=0;else if(e.gte(l)){var g=l;for(h=1;g.lt(e);)if(h+=1,(g=n.pow(g)).layer>3){var m=Math.floor(e.layer-g.layer+1);g=n.iteratedexp(m,g,r),h+=m}g.gt(e)&&(g=g.log(i),h-=1)}else if(e.lt(o)){var c=o;for(h=0;c.gt(e);)c=c.log(i),h-=1}for(var v=0,y=0,d=.5,N=o,p=t.dZero;d>1e-16;){if(y=v+d,N=o.pow(1-y).mul(l.pow(y)),(p=t.iteratedexp(i,h,N)).eq(e))return[new t(h+y),2];p.lt(e)&&(v+=d),d/=2}return p.neq_tolerance(e,1e-7)?[new t(t.dNaN),0]:[new t(h+v),2]}if(e.lt(u)&&e.gt(s)){var b=s.mul(u).sqrt(),k=n.pow(b),w=0;if(e.lte(b)&&e.gt(k))w=0;else if(e.lte(k)){var M=k;for(w=1;M.gt(e);)M=n.pow(M),w+=1;M.lt(e)&&(M=M.log(i),w-=1)}else if(e.gt(b)){var I=b;for(w=0;I.lt(e);)I=I.log(i),w-=1}for(var _=0,q=0,F=.5,S=b,x=t.dZero;F>1e-16;){if(q=_+F,S=b.pow(1-q).mul(k.pow(q)),(x=t.iteratedexp(i,w,S)).eq(e))return[new t(w+q),1];x.gt(e)&&(_+=F),F/=2}return x.neq_tolerance(e,1e-7)?[new t(t.dNaN),0]:[new t(w+_),1]}throw new Error("Unhandled behavior in excess_slog")}},{key:"increasingInverse",value:function(e){var i=arguments.length>1&&void 0!==arguments[1]&&arguments[1],r=arguments.length>2&&void 0!==arguments[2]?arguments[2]:120,n=arguments.length>3&&void 0!==arguments[3]?arguments[3]:t.dLayerMax.neg(),s=arguments.length>4&&void 0!==arguments[4]?arguments[4]:t.dLayerMax,o=arguments.length>5&&void 0!==arguments[5]?arguments[5]:t.dLayerMax.neg(),l=arguments.length>6&&void 0!==arguments[6]?arguments[6]:t.dLayerMax;return function(h){if(h=new t(h),n=new t(n),s=new t(s),o=new t(o),l=new t(l),h.isNan()||s.lt(n)||h.lt(o)||h.gt(l))return new t(t.dNaN);var g=function(e){return new t(e)},f=!0;if(s.lt(0))f=!1;else if(n.gt(0))f=!0;else{var m=e(t.dZero);if(m.eq(h))return c(0,0,0);f=h.gt(m),i&&(f=!f)}var v,y=f;if(f){if(s.lt(u))f=!0;else if(n.gt(u))f=!1;else{var d=e(new t(u));f=h.lt(d),i&&(f=!f)}if(f){v=!0;var N=t.pow(10,a).recip();if(s.lt(N))f=!1;else if(n.gt(N))f=!0;else{var p=e(new t(N));f=h.gt(p),i&&(f=!f)}if(f)g=function(e){return t.pow(10,e).recip()};else{var b=t.tetrate(10,a);if(s.lt(b))f=!1;else if(n.gt(b))f=!0;else{var k=e(new t(b));f=h.gt(k),i&&(f=!f)}g=f?function(e){return t.tetrate(10,new t(e).toNumber()).recip()}:function(e){return new t(e).gt(Math.log10(Number.MAX_VALUE))?t.dZero:t.tetrate(10,t.pow(10,e).toNumber()).recip()}}}else{if(v=!1,s.lt(a))f=!0;else if(n.gt(a))f=!1;else{var w=e(new t(a));f=h.lt(w),i&&(f=!f)}if(f)g=function(e){return new t(e)};else{var M=t.pow(10,a);if(s.lt(M))f=!0;else if(n.gt(M))f=!1;else{var I=e(new t(M));f=h.lt(I),i&&(f=!f)}if(f)g=function(e){return t.pow(10,e)};else{var _=t.tetrate(10,a);if(s.lt(_))f=!0;else if(n.gt(_))f=!1;else{var q=e(new t(_));f=h.lt(q),i&&(f=!f)}g=f?function(e){return t.tetrate(10,new t(e).toNumber())}:function(e){return new t(e).gt(Math.log10(Number.MAX_VALUE))?t.dInf:t.tetrate(10,t.pow(10,e).toNumber())}}}}}else{if(v=!0,s.lt(-u))f=!1;else if(n.gt(-u))f=!0;else{var F=e(new t(-u));f=h.gt(F),i&&(f=!f)}if(f){var S=t.pow(10,a).recip().neg();if(s.lt(S))f=!0;else if(n.gt(S))f=!1;else{var x=e(new t(S));f=h.lt(x),i&&(f=!f)}if(f)g=function(e){return t.pow(10,e).recip().neg()};else{var E=t.tetrate(10,a).neg();if(s.lt(E))f=!0;else if(n.gt(E))f=!1;else{var T=e(new t(E));f=h.lt(T),i&&(f=!f)}g=f?function(e){return t.tetrate(10,new t(e).toNumber()).recip().neg()}:function(e){return new t(e).gt(Math.log10(Number.MAX_VALUE))?t.dZero:t.tetrate(10,t.pow(10,e).toNumber()).recip().neg()}}}else{if(v=!1,s.lt(-a))f=!1;else if(n.gt(-a))f=!0;else{var O=e(new t(-a));f=h.gt(O),i&&(f=!f)}if(f)g=function(e){return t.neg(e)};else{var C=t.pow(10,a).neg();if(s.lt(C))f=!1;else if(n.gt(C))f=!0;else{var z=e(new t(C));f=h.gt(z),i&&(f=!f)}if(f)g=function(e){return t.pow(10,e).neg()};else{var V=t.tetrate(10,a).neg();if(s.lt(V))f=!1;else if(n.gt(V))f=!0;else{var A=e(new t(V));f=h.gt(A),i&&(f=!f)}g=f?function(e){return t.tetrate(10,new t(e).toNumber()).neg()}:function(e){return new t(e).gt(Math.log10(Number.MAX_VALUE))?t.dNegInf:t.tetrate(10,t.pow(10,e).toNumber()).neg()}}}}}for(var P=y!=v!=i,D=P?function(e,i){return t.gt(e,i)}:function(e,i){return t.lt(e,i)},Z=.001,Y=!1,L=!1,G=1,U=t.dOne,X=0,W=!1,j=1;j<r;++j){W=!1,X=G,(U=g(G)).gt(s)&&(U=s,W=!0),U.lt(n)&&(U=n,W=!0);var B=e(U);if(B.eq(h)&&!W)break;var R=D(B,h);if(j>1&&L!=R&&(Y=!0),L=R,Y?Z/=2:Z*=2,R!=P&&U.eq(s)||R==P&&U.eq(n))return new t(t.dNaN);if(G+=Z=Math.abs(Z)*(R?-1:1),0===Z||X==G)break}return g(G)}}}]),t}();return b.dZero=c(0,0,0),b.dOne=c(1,0,1),b.dNegOne=c(-1,0,1),b.dTwo=c(1,0,2),b.dTen=c(1,0,10),b.dNaN=c(Number.NaN,Number.NaN,Number.NaN),b.dInf=c(1,Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY),b.dNegInf=c(-1,Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY),b.dNumberMax=m(1,0,Number.MAX_VALUE),b.dNumberMin=m(1,0,Number.MIN_VALUE),b.dLayerSafeMax=m(1,Number.MAX_SAFE_INTEGER,a-1),b.dLayerSafeMin=m(1,Number.MAX_SAFE_INTEGER,-(a-1)),b.dLayerMax=m(1,Number.MAX_VALUE,a-1),b.dLayerMin=m(1,Number.MAX_VALUE,-(a-1)),b.fromStringCache=new r(1023),f=b.fromValue_noAlloc,m=b.fromComponents,c=b.fromComponents_noNormalize,b.fromMantissaExponent,b.fromMantissaExponent_noNormalize,b}));
+
+</script>
+<script>
+const DIGITS={"pi":"3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381964428810975665933446128475648233786783165271201909145648566923460348610454326648213393607260249141273724587006606315588174881520920962829254091715364367892590360011330530548820466521384146951941511609433057270365759591953092186117381932611793105118548074462379962749567351885752724891227938183011949129833673362440656643086021394946395224737190702179860943702770539217176293176752384674818467669405132","e":"2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427427466391932003059921817413596629043572900334295260595630738132328627943490763233829880753195251019011573834187930702154089149934884167509244761460668082264800168477411853742345442437107539077744992069551702761838606261331384583000752044933826560297606737113200709328709127443747047230696977209310141692836819025515108657463772111252389784425056953696770785449969967946864454905987931636889230098793127736178215424999229576351482208269895193668033182528869398496465105820939239829488793320362509443117","phi":"1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137484754088075386891752126633862223536931793180060766726354433389086595939582905638322661319928290267880675208766892501711696207032221043216269548626296313614438149758701220340805887954454749246185695364864449241044320771344947049565846788509874339442212544877066478091588460749988712400765217057517978834166256249407589069704000281210427621771117778053153171410117046665991466979873176135600670874807101317952368942752194843530567830022878569978297783478458782289110976250030269615617002504643382437764","sqrt2":"1.414213562373095048801688724209698078569671875376948073176679737990732478462107038850387534327641572735013846230912297024924836055850737212644121497099935831413222665927505592755799950501152782060571470109559971605970274534596862014728517418640889198609552329230484308714321450839762603627995251407989687253396546331808829640620615258352395054745750287759961729835575220337531857011354374603408498847160386899970699004815030544027790316454247823068492936918621580578463111596668713013015618568987237235288509264861249497715421833420428568606014682472077143585487415565706967765372022648544701585880162","gamma":"0.577215664901532860606512090082402431042159335939923598805767234884867726777664670936947063291746749514631447249807082480960504014486542836224173997644923536253500333742937337737673942792595258247094916008735203948165670853233151776611528621199501507984793745085705740029921354786146694029604325421519058775535267331399254012967420513754139549111685102807984234877587205038431093997361372553060889331267600172479537836759271351577226102734929139407984301034177717780881549570661075010161916633401522789358679654972520362128792265559536696281763887927268013243101047650596370394739495763890657296792960","ln2":"0.693147180559945309417232121458176568075500134360255254120680009493393621969694715605863326996418687542001481020570685733685520235758130557032670751635075961930727570828371435190307038623891673471123350115364497955239120475172681574932065155524734139525882950453007095326366642654104239157814952043740430385500801944170641671518644712839968171784546957026271631064546150257207402481637773389638550695260668341137273873722928956493547025762652098859693201965058554764703306793654432547632744951250406069438147104689946506220167720424524529612687946546193165174681392672504103802546259656869144192871608"};
+
+'use strict';
+/* ============================================================
+   数之塔 · 核心逻辑  v1.0.0
+   ============================================================ */
+const VERSION = '1.0.0';
+const TUNE = (typeof globalThis !== 'undefined' && globalThis.TUNE) || {};
+const D = x => (x instanceof Decimal ? x : new Decimal(x));
+const INF = new Decimal(Number.MAX_VALUE);
+const TR_REQ = 1e4;      // 超越需要 log10(数) ≥ 1e4
+const FO_REQ = 1e6;      // 力迫需要 log10(数) ≥ 1e6
+const HY_REQ = 1e100;    // 超运算需要 log10(数) ≥ 1e100（古戈尔普勒克斯）
+const PENT_REQ = 10;     // 五级运算需要 slog₁₀(数) ≥ 10，即 10↑↑10 = 10↑↑↑2
+const END_P = 10;        // 10↑↑↑10
+
+function pow10(L) { return Decimal.pow(10, L); }
+function lg(x) { x = D(x); return x.lte(1) ? new Decimal(0) : x.log10(); }
+function lgn(x) { x = D(x); if (x.lte(1)) return 0; const l = x.log10(); return l.gte(1e300) ? 1e300 : l.toNumber(); }
+// 软上限：对数值 L 超过 s 后按对数增长
+function sc(L, s) { L = D(L); if (L.lte(s)) return L; return L.div(s).ln().add(1).mul(s); }
+
+/* ---------- 价格曲线：线性 → 二次 → 指数 ---------- */
+class Cost {
+  constructor(a, b, o = {}) {
+    this.a = a; this.b = b;
+    this.L1 = o.L1 ?? 308; this.q = o.q ?? 0.5; this.L2 = o.L2 ?? 1e5; this.K = o.K ?? 100;
+    this.x1 = Math.max(0, (this.L1 - a) / b); this.c1 = a + b * this.x1;
+    if (this.c1 >= this.L2) this.x2 = this.x1;
+    else this.x2 = this.x1 + (-b + Math.sqrt(b * b + 4 * this.q * (this.L2 - this.c1))) / (2 * this.q);
+    this.cL2 = this.c1 + b * (this.x2 - this.x1) + this.q * (this.x2 - this.x1) ** 2;
+    this.x3 = this.x2 + this.K * Math.max(0, 30 - Math.log10(this.cL2));
+    this.tCap = o.tCap ?? 1e5;
+  }
+  // 返回 log10(价格)
+  log(x) {
+    if (x <= this.x1) return new Decimal(this.a + this.b * x);
+    if (x <= this.x2) { const y = x - this.x1; return new Decimal(this.c1 + this.b * y + this.q * y * y); }
+    if (x <= this.x3) return Decimal.pow(10, (x - this.x2) / this.K).mul(this.cL2);
+    return Decimal.pow(10, Decimal.pow(10, Math.log10(30) + (x - this.x3) / (this.K * 3)));
+  }
+  cost(x) { return pow10(this.log(x)); }
+  maxLv(L) {   // 可负担的等级数（L 为货币的 log10）
+    L = D(L);
+    if (L.lt(this.a)) return 0;
+    if (L.lte(this.c1)) return Math.floor((L.toNumber() - this.a) / this.b + 1e-9) + 1;
+    if (L.lte(this.cL2)) { const y = (-this.b + Math.sqrt(this.b ** 2 + 4 * this.q * (L.toNumber() - this.c1))) / (2 * this.q); return Math.floor(this.x1 + y + 1e-9) + 1; }
+    const ll = L.log10();
+    if (ll.lte(30)) return Math.floor(this.x2 + this.K * (ll.toNumber() - Math.log10(this.cL2)) + 1e-9) + 1;
+    const t = Math.min(ll.div(30).log10().toNumber(), this.tCap);
+    return Math.floor(this.x3 + this.K * 3 * t + 1e-9) + 1;
+  }
+}
+// 批量购买：返回 {n, spent} 或 null
+function bulk(cost, x, cur, maxAdd = Infinity) {
+  cur = D(cur);
+  if (cur.lte(0)) return null;
+  let n = Math.min(cost.maxLv(cur.log10()), x + maxAdd);
+  if (n <= x) return null;
+  for (let tries = 0; tries < 4 && n > x; tries++) {
+    let spent = new Decimal(0);
+    for (let i = n - 1; i >= Math.max(x, n - 6); i--) spent = spent.add(cost.cost(i));
+    if (spent.lte(cur)) return { n, spent };
+    n--;
+  }
+  return null;
+}
+
+/* ---------- 质数 ---------- */
+const PRIME_TBL = (() => {
+  const N = 200000, comp = new Uint8Array(N + 1), cnt = new Uint32Array(N + 1);
+  let c = 0;
+  for (let i = 2; i <= N; i++) { if (!comp[i]) { c++; for (let j = i * i; j <= N; j += i) comp[j] = 1; } cnt[i] = c; }
+  return { N, comp, cnt };
+})();
+function primePi(x) {
+  x = D(x);
+  if (x.lt(2)) return new Decimal(0);
+  if (x.lt(PRIME_TBL.N)) return new Decimal(PRIME_TBL.cnt[Math.floor(x.toNumber())]);
+  return x.div(x.ln().sub(1.08366));
+}
+function modpow(b, e, m) { let r = 1n; b %= m; while (e > 0n) { if (e & 1n) r = r * b % m; b = b * b % m; e >>= 1n; } return r; }
+function isPrime(n) {
+  if (n < 2) return false;
+  if (n <= PRIME_TBL.N) return !PRIME_TBL.comp[n];
+  for (const p of [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]) if (n % p === 0) return n === p;
+  const N = BigInt(n); let d = N - 1n, r = 0;
+  while (d % 2n === 0n) { d /= 2n; r++; }
+  outer: for (const a of [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n]) {
+    let x = modpow(a, d, N);
+    if (x === 1n || x === N - 1n) continue;
+    for (let i = 1; i < r; i++) { x = x * x % N; if (x === N - 1n) continue outer; }
+    return false;
+  }
+  return true;
+}
+const MERSENNE = [2, 3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091, 756839, 859433, 1257787, 1398269, 2976221, 3021377, 6972593, 13466917, 20996011, 24036583, 25964951, 30402457, 32582657, 37156667, 42643801, 43112609, 57885161, 74207281, 77232917, 82589933, 136279841];
+function mersCount(x) {
+  const l2 = lgn(x) / Math.log10(2);
+  let c = 0; for (const p of MERSENNE) { if (l2 >= p) c++; else break; }
+  return c;
+}
+
+/* ============================================================
+   数据定义
+   ============================================================ */
+const GENS = [
+  { n: '手指', g: '指', a: 1, b: 3, f: '十根手指，十进制的起源。' },
+  { n: '算筹', g: '筹', a: 2, b: 4, f: '纵横相间，以竹为数。' },
+  { n: '算盘', g: '珠', a: 4, b: 5, f: '上二下五，口诀在心。' },
+  { n: '纳皮尔骨筹', g: '骨', a: 6, b: 6, f: '把乘法表刻在骨头上。' },
+  { n: '计算尺', g: '尺', a: 9, b: 8, f: '对数让乘法变成了滑动。' },
+  { n: '差分机', g: '轮', a: 13, b: 10, f: '巴贝奇的齿轮从未停转。' },
+  { n: '电子计算机', g: '电', a: 18, b: 12, f: '1946 年，每秒五千次加法。' },
+  { n: '量子计算机', g: '量', a: 24, b: 15, f: '同时算出所有答案，然后坍缩成一个。' },
+];
+const THEOREMS = [
+  { id: 1, n: '勾股定理', m: 'a² + b² = c²', c: 3, d: '手指和算筹产量 ×3' },
+  { id: 2, n: '欧几里得算法', m: 'gcd(a, b) = gcd(b, a mod b)', c: 6, d: '运算速度每级倍率 +0.005' },
+  { id: 3, n: '埃拉托色尼筛法', m: '划去所有倍数，剩下的就是质数', c: 10, d: '解锁“质数”章节' },
+  { id: 4, n: '阿基米德穷竭法', m: '3.1408 < π < 3.1429', c: 20, d: '所有计数器 ×log₁₀(数)' },
+  { id: 5, n: '斐波那契数列', m: 'Fₙ = Fₙ₋₁ + Fₙ₋₂', c: 35, d: '数位扩展倍率 +0.5' },
+  { id: 6, n: '笛卡尔坐标系', m: '(x, y)', c: 55, d: '第 k 阶计数器额外 ×k' },
+  { id: 7, n: '微积分基本定理', m: '∫ f′(x) dx = f(b) − f(a)', c: 80, d: '所有计数器 ×√(本轮秒数)' },
+  { id: 8, n: '欧拉恒等式', m: 'e^{iπ} + 1 = 0', c: 120, d: '进制跃迁效果 +50%' },
+  { id: 9, n: '高斯求和', m: '1 + 2 + … + 100 = 5050', c: 170, d: '所有计数器 ×(1 + 总购买数/50)' },
+  { id: 10, n: '黎曼 ζ 函数', m: 'ζ(s) = Σ 1/nˢ', c: 240, d: '质数效果指数 ×1.5' },
+];
+const INFU_COST = [1, 1, 1, 2, 2, 3, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25];
+const INFU = [
+  ['芝诺悖论', '所有计数器随总游戏时间增强'],
+  ['希尔伯特旅馆', '无穷后保留 4 次数位扩展'],
+  ['哥德尔编码', '无穷后保留全部定理'],
+  ['康托尔对角线', '所有计数器随无穷次数增强'],
+  ['可数无穷 ℵ₀', '解锁计数器与运算速度的自动购买'],
+  ['罗素悖论', '解锁数位扩展与进制跃迁的自动执行'],
+  ['伽利略悖论', '运算速度每级倍率 +0.01'],
+  ['连续统', '无穷后保留质数筛；解锁筛子自动升级'],
+  ['巴塞尔问题', '数的产量随 ∞ 点增强'],
+  ['调和级数', '每 10 个加成 +0.2'],
+  ['超实数', '质数效果指数 +0.05'],
+  ['庞加莱回归', '解锁自动无穷'],
+  ['康托尔集', '进制跃迁需求 −10'],
+  ['布劳威尔不动点', '每轮以 10²⁵ 个数开局'],
+  ['不完备定理', '∞ 点获取 ×2'],
+  ['永恒回归', '解锁 ∞ 发生器'],
+].map((x, i) => ({ id: 'i' + (i + 1), n: x[0], d: x[1], c: INFU_COST[i] }));
+const CHALS = [
+  { id: 1, n: '费马大定理', d: '无法购买运算速度', r: '运算速度每级倍率 +0.01', g: 150 },
+  { id: 2, n: '哥德巴赫猜想', d: '质数筛完全失效', r: '质数效果指数 +0.05', g: 308 },
+  { id: 3, n: '四色定理', d: '无法进行进制跃迁', r: '进制跃迁效果 +20%', g: 260 },
+  { id: 4, n: '庞加莱猜想', d: '最多进行 5 次数位扩展', r: '数位扩展倍率 +0.5', g: 250 },
+  { id: 5, n: '黎曼猜想', d: '计数器内在倍率 ^0.8', r: '计数器内在倍率 ^1.03', g: 230 },
+  { id: 6, n: '考拉兹猜想', d: '计数器价格增长 ×1.5', r: '计数器价格增长 −8%', g: 260 },
+  { id: 7, n: '孪生质数猜想', d: '每 10 个加成降为 ×1.25', r: '每 10 个加成 +0.2', g: 220 },
+  { id: 8, n: 'P 与 NP', d: '同时受费马、四色、黎曼三重限制', r: '可以打破无穷', g: 130 },
+];
+const chalGoal = i => pow10(CHALS[i - 1].g);
+const BRKU = [
+  ['超限数 ω', 4, '∞ 能量效果 +20%'],
+  ['ω + 1', 6, '所有计数器 ×(1 + 无穷次数)'],
+  ['ω · 2', 8, '∞ 点获取 ×(1 + 无穷次数)^0.3'],
+  ['ω²', 11, '质数效果指数 +0.05'],
+  ['ω^ω', 15, '运算速度每级倍率 +0.02'],
+  ['ε₀', 20, '每 10 个加成 +0.3'],
+  ['ζ₀', 26, '∞ 能量增速 ×1.5'],
+  ['Γ₀', 33, '∞ 点获取 ×1000'],
+  ['大维布伦序数', 42, '巴塞尔问题指数 0.5 → 0.75'],
+].map((x, i) => ({ id: 'b' + (i + 1), n: x[0], c: x[1], d: x[2] }));
+const IGENS = [
+  { n: '极限', g: 'lim', a: 2, b: 2 },
+  { n: '级数', g: 'Σ', a: 4, b: 3 },
+  { n: '积分', g: '∫', a: 7, b: 4 },
+  { n: '超限', g: 'ω', a: 11, b: 5 },
+];
+const CONSTS = [
+  { id: 'pi', s: 'π', n: '圆周率', a: 0, b: 0.30, d: '计数器内在倍率的指数 +1%/位' },
+  { id: 'e', s: 'e', n: '自然常数', a: 0.3, b: 0.35, d: '∞ 点获取 ×e²/位' },
+  { id: 'phi', s: 'φ', n: '黄金比例', a: 0.6, b: 0.40, d: '∞ 能量增速 +5%/位' },
+  { id: 'sqrt2', s: '√2', n: '毕达哥拉斯常数', a: 0.9, b: 0.45, d: '质数筛速度 ×4/位，质数效果指数 +0.004/位' },
+  { id: 'gamma', s: 'γ', n: '欧拉-马歇罗尼常数', a: 1.2, b: 0.5, d: '超越点获取 ×(1+位数)²' },
+];
+const TRU = [
+  ['林德曼定理', 0, '所有计数器 ×(1 + 超越点)³'],
+  ['刘维尔数', 0.5, '∞ 能量效果 +30%'],
+  ['埃尔米特定理', 1, '∞ 点获取 ×(1 + 超越次数)²'],
+  ['盖尔丰德定理', 1.7, '数位扩展倍率 +1'],
+  ['夏努恩常数', 2.5, 'π 的效果 ×1.2'],
+  ['钱珀瑙恩常数', 3.5, '质数效果指数 +0.1'],
+  ['费根鲍姆常数', 5, '解锁分形'],
+  ['康威常数', 7, '每 10 个加成 +0.5'],
+  ['柴廷常数 Ω', 10, '超越能量增速 ×2，超越点获取 ×10'],
+  ['哈代-拉马努金数', 15, '所有计数器 ×1729^(超越次数^0.5)'],
+].map((x, i) => ({ id: 't' + (i + 1), n: x[0], c: x[1], d: x[2] }));
+const TR_MILES = [
+  [1, '保留猜想证明、打破无穷与全部自动购买器'],
+  [2, '保留无穷升级'],
+  [3, '保留打破无穷升级'],
+  [5, '解锁 ∞ 发生器与 ∞ 点倍增的自动购买'],
+  [8, '每轮以 100 万 ∞ 点开局'],
+  [12, '解锁自动超越'],
+  [20, '每秒被动获得当前可得超越点的 1%'],
+  [40, '解锁常数自动背诵'],
+];
+const AXIOMS = [
+  ['外延公理', 0, '力迫后保留超越升级'],
+  ['空集公理', 0.3, '每秒被动获得当前可得超越点的 10%'],
+  ['配对公理', 0.6, '基数获取 ×2'],
+  ['并集公理', 1, '力迫后保留常数位数'],
+  ['幂集公理', 1.5, '集合增长 ×2'],
+  ['无穷公理', 2, '解锁自动力迫'],
+  ['替换公理', 3, 'ℵ 的效果 ^1.2'],
+  ['正则公理', 5, '基数获取 ×(1 + 集合/10)'],
+  ['选择公理', 8, '集合增长 ×2'],
+].map((x, i) => ({ id: 'z' + (i + 1), n: x[0], c: x[1], d: x[2] }));
+// 超运算升级：c 为所需塔高（slog₁₀ 数）
+const HYU = [
+  ['加法塔', 3.45, '塔高增速 ×2'],
+  ['乘法塔', 3.7, '塔高增速 ×2'],
+  ['幂塔', 4.0, '集合增长 ×3'],
+  ['迭代幂次 ↑↑', 4.4, '塔高增速 ×2'],
+  ['阿克曼函数 A(4, 2)', 4.9, '基数获取 ^1.5'],
+  ['康威链 3→3→3', 5.5, '塔高增速 ×2'],
+  ['斯坦豪斯多边形', 6.2, '塔高增速 ×1.5'],
+  ['莫泽数', 7.0, '集合增长 ×5'],
+  ['斯坦豪斯-莫泽记号', 7.9, '塔高增速 ×1.5'],
+  ['十层塔 decker', 9.0, '塔高增速 ×1.5，并为五级运算预热'],
+].map((x, i) => ({ id: 'h' + (i + 1), n: x[0], c: x[1], d: x[2] }));
+// 五级运算升级：c 为所需五级高度 p（数 = 10↑↑↑p）
+const PEU = [
+  ['tetration 的塔高', 2.15, '五级增速 ×2'],
+  ['giggol 10↑↑100', 2.4, '五级增速 ×2'],
+  ['tritri 3↑↑↑3', 2.8, '塔高增速 ×10'],
+  ['10↑↑↑3', 3.3, '五级增速 ×2'],
+  ['grangol', 3.9, '五级增速 ×1.6'],
+  ['康威链 3→3→4', 4.6, '“再加一支箭”价格增长 −20%'],
+  ['阿克曼 A(5, 5)', 5.4, '五级增速 ×1.6'],
+  ['SSCG(2)', 6.3, '五级增速 ×1.5'],
+  ['忙碌海狸 Σ(5)', 7.3, '五级增速 ×1.5'],
+  ['TREE(2) 的阴影', 8.3, '五级增速 ×1.4'],
+  ['tridecal 10↑↑↑10', 10, '五级增速 ×1.3，致敬所有无穷'],
+].map((x, i) => ({ id: 'p' + (i + 1), n: x[0], c: x[1], d: x[2] }));
+
+/* 著名的数：里程碑 */
+const FAMOUS = [
+  [D(100), '一百', '人类最早熟悉的“大数”'],
+  [D(1e4), '一万', '“万”曾是汉语中最大的单位'],
+  [D(1e8), '一亿', '万万为亿'],
+  [D('6.02214076e23'), '阿伏伽德罗常数', '一摩尔物质里的粒子数'],
+  [D(1e68), '无量大数', '中文传统数字单位的尽头'],
+  [D(1e80), '宇宙原子数', '可观测宇宙中大约有这么多原子'],
+  [D(1e100), '古戈尔', '1 后面跟 100 个 0，谷歌由此得名'],
+  [INF, '浮点无穷', '双精度浮点数能表示的最大值 ≈ 2¹⁰²⁴'],
+  [D('1e1000'), '一千位数', '写下它需要一千个数字'],
+  [D('1e10000'), '一万位数', '大约是一本小册子的长度'],
+  [D('1e41024320'), '最大已知质数', '2¹³⁶²⁷⁹⁸⁴¹ − 1，2024 年发现'],
+  [D('1e105000000000000'), 'π 的已知位数', '一个比 π 已知位数还长的数'],
+  [D('ee100'), '古戈尔普勒克斯', '10 的古戈尔次方'],
+  [D('ee122'), '宇宙状态数', '可观测宇宙所有可能量子态的粗略上界'],
+  [D('eee10'), '10↑↑4', '四层 10 的指数塔'],
+  [D('eee34'), '斯奎斯数', '曾出现在数学证明中的“最大的数”'],
+  [D('eee100'), '古戈尔普勒克斯普勒克斯', '再套一层'],
+  [D('eee200'), '绝对无限的门槛', '1.0.0 版本的边界'],
+];
+
+/* ============================================================
+   状态
+   ============================================================ */
+let S = null;
+function newState() {
+  return {
+    ver: VERSION, created: Date.now(), last: Date.now(),
+    time: { all: 0, inf: 0, tr: 0, fo: 0, offline: 0 },
+    n: D(10), maxN: D(10), clicks: 0,
+    gens: GENS.map(() => ({ a: D(0), b: 0 })),
+    spd: 0, boost: 0, base: 0, th: {},
+    sv: { x: D(2), lv: 0 },
+    inf: { ip: D(0), tot: D(0), cnt: 0, fast: 1e300, upg: {}, rep: 0, brk: false, chal: 0, done: {},
+      g: IGENS.map(() => ({ a: D(0), b: 0 })), ie: D(0), best: D(0) },
+    tr: { tp: D(0), tot: D(0), cnt: 0, fast: 1e300, upg: {}, dg: { pi: 0, e: 0, phi: 0, sqrt2: 0, gamma: 0 }, fr: 0, best: D(0), te: 0 },
+    st: { k: D(0), tot: D(0), cnt: 0, ax: {}, al: 0, s: 0 },
+    hy: { on: false, h: 0, upg: {}, rep: 0 },
+    pt: { on: false, p: 2, upg: {}, rep: 0 },
+    ach: {},
+    au: { gen: true, spd: true, boost: true, base: true, sieve: true, th: true, cr: true, crMode: 2, crVal: '1', igen: true, rep: true, iupg: true,
+      tr: false, trMode: 0, trVal: '1', cst: true, fo: false, foVal: '2', hy: true, hrep: true, baseMax: 0 },
+    opt: { nota: 'sci', theme: 'auto', news: true, offline: true, conf: true, fps: 20 },
+    stat: { newsRead: 0, maxSlog: 0, peakIPm: D(0), offlineGot: false },
+    end: { done: false, seen: false, time: 0 },
+  };
+}
+
+/* ---------- 判断工具 ---------- */
+const hasTh = i => !!S.th[i];
+const hasI = id => !!S.inf.upg[id];
+const hasB = id => !!S.inf.upg[id];
+const hasT = id => !!S.tr.upg[id];
+const hasZ = id => !!S.st.ax[id];
+const hasH = id => !!S.hy.upg[id];
+const hasP = id => !!S.pt.upg[id];
+const cDone = i => !!S.inf.done[i];
+const inC = i => S.inf.chal === i || (S.inf.chal === 8 && (i === 1 || i === 3 || i === 5));
+const trMile = n => S.tr.cnt >= n;
+const unl = {
+  sieve: () => hasTh(3) || (hasI('i8') && S.sv.lv > 0),
+  inf: () => S.inf.cnt > 0 || S.tr.cnt > 0 || S.st.cnt > 0,
+  chal: () => S.inf.cnt >= 1 || S.tr.cnt > 0 || S.st.cnt > 0,
+  igen: () => hasI('i16'),
+  brk: () => S.inf.brk,
+  tr: () => S.tr.cnt > 0 || S.st.cnt > 0 || (S.inf.brk && lg(S.maxN).gte(TR_REQ * 0.5)),
+  frac: () => hasT('t7'),
+  st: () => S.st.cnt > 0 || lg(S.maxN).gte(FO_REQ * 0.3) && S.tr.cnt > 0,
+  hy: () => S.hy.on,
+  pt: () => S.pt.on,
+};
+
+/* ============================================================
+   数值计算（每 tick 缓存）
+   ============================================================ */
+const C = {};
+C.ieExp0 = () => 1 + (hasB('b1') ? 0.2 : 0) + (hasT('t2') ? 0.3 : 0);
+const totalBought = () => S.gens.reduce((s, g) => s + g.b, 0);
+function genCost(k) {
+  let b = GENS[k].b;
+  if (inC(6)) b *= 1.5;
+  if (cDone(6)) b *= 0.92;
+  const key = k + ':' + b;
+  if (!genCost.c[key]) genCost.c[key] = new Cost(GENS[k].a, b, { L1: 308, q: 0.5, L2: 1e6, K: 300 });
+  return genCost.c[key];
+}
+genCost.c = {};
+const SPD_COST = new Cost(3, 1, { L1: 308, q: 0.25, L2: 1e6, K: 300 });
+const SIEVE_COST = new Cost(10, 3, { L1: 308, q: 0.5, L2: 1e5, K: 200 });
+const REP_COST = new Cost(1, 0.7, { L1: 308, q: 0.5, L2: 1e5, K: 200 });
+const igenCost = j => igenCost.c[j] || (igenCost.c[j] = new Cost(IGENS[j].a, IGENS[j].b, { L1: 308, q: 0.5, L2: 1e5, K: 200 }));
+igenCost.c = {};
+const constCost = c => constCost.c[c.id] || (constCost.c[c.id] = new Cost(c.a, c.b, { L1: 30, q: 0.02, L2: 3000, K: 80 }));
+constCost.c = {};
+const FRAC_COST = new Cost(5, 1.5, { L1: 60, q: 0.2, L2: 2000, K: 30 });
+const ALEPH_COST = new Cost(0, 1, { L1: 30, q: 0.15, L2: 600, K: 25, tCap: 25 });
+function hrepNextAt(lv) { const k = hasP('p6') ? 0.8 : 1; return 3.6 + k * ((TUNE.hra ?? 0.15) * lv + (TUNE.hrb ?? 0.01) * lv * lv); }
+function prepNextAt(lv) { const k = hasP('p6') ? 0.8 : 1; return 2.1 + k * ((TUNE.pra ?? 0.12) * lv + (TUNE.prb ?? 0.008) * lv * lv); }
+
+function digitsFor(id) { return S.tr.dg[id] || 0; }
+function piEff() { return 1 + 0.01 * digitsFor('pi') * (hasT('t5') ? 1.2 : 1); }
+
+function softE(x, c) { return x <= c ? x : c * (1 + Math.log10(x / c)); }
+function recalc() {
+  // 每 10 个加成
+  let B = 2 + (hasI('i10') ? 0.2 : 0) + (cDone(7) ? 0.2 : 0) + (hasB('b6') ? 0.3 : 0) + (hasT('t8') ? 0.5 : 0);
+  if (inC(7)) B = 1.25;
+  C.B = B;
+  C.bp = 2 + (hasTh(5) ? 0.5 : 0) + (cDone(4) ? 0.5 : 0) + (hasT('t4') ? 1 : 0);
+  C.boostMult = Decimal.pow(C.bp, S.boost);
+  C.baseEff = 1 + (hasTh(8) ? 0.5 : 0) + (cDone(3) ? 0.2 : 0);
+  C.ps = (TUNE.ps ?? 1.06) + (hasTh(2) ? 0.005 : 0) + (hasI('i7') ? 0.01 : 0) + (cDone(1) ? 0.01 : 0) + (hasB('b5') ? 0.02 : 0) + (TUNE.pb ?? 0.01) * S.base * C.baseEff;
+  C.spdMult = Decimal.pow(C.ps, S.spd);
+  C.mers = mersCount(S.sv.x);
+  C.achN = Object.keys(S.ach).length;
+  // 内在指数
+  let E = new Decimal(1);
+  if (inC(5)) E = E.mul(0.8);
+  if (cDone(5)) E = E.mul(1.03);
+  C.Epi = softE(piEff(), TUNE.pic ?? 1.5);
+  E = E.mul(C.Epi);
+  C.EieRaw = 1 + Math.sqrt(S.inf.ie.min(1e300).toNumber()) / 10 * C.ieExp0();
+  C.Eie = softE(C.EieRaw, TUNE.iec ?? 5);
+  E = E.mul(C.Eie);
+  C.teRate = S.tr.cnt > 0 ? (TUNE.ter ?? 7e-5) * Math.sqrt(1 + Object.values(S.tr.dg).reduce((a, b) => a + b, 0)) * (1 + 0.1 * S.tr.fr) * (hasT('t9') ? 2 : 1) : 0;
+  C.Ete = softE(1 + Math.sqrt(S.tr.te) / 5, TUNE.tec ?? 30);
+  E = E.mul(C.Ete);
+  C.Eset = Decimal.pow(2, S.st.s);
+  E = E.mul(C.Eset);
+  C.E = E;
+  // 质数
+  C.pi = primePi(S.sv.x);
+  C.pe = ((TUNE.pe ?? 0.15) + (cDone(2) ? 0.05 : 0) + (hasI('i11') ? 0.05 : 0) + (hasB('b4') ? 0.05 : 0) + (hasT('t6') ? 0.1 : 0) + 0.004 * digitsFor('sqrt2')) * (hasTh(10) ? 1.5 : 1);
+  C.primeLog = inC(2) || !unl.sieve() ? new Decimal(0) : sc(lg(C.pi.add(1)).mul(C.pe), 300);
+  C.sieveSpd = Decimal.pow(2, S.sv.lv).mul(Decimal.pow(2, C.mers)).mul(Decimal.pow(4, digitsFor('sqrt2')));
+  // 交叉倍率（对数，全部计数器）
+  let X = new Decimal(0);
+  X = X.add(C.primeLog);
+  if (hasTh(4)) X = X.add(lg(lg(S.n.add(10))));
+  if (hasTh(7)) X = X.add(Math.log10(Math.max(1, S.time.inf)) * 0.5);
+  if (hasTh(9)) X = X.add(Math.log10(1 + totalBought() / 50));
+  if (hasB('b2')) X = X.add(sc(Math.log10(1 + S.inf.cnt), 40));
+  C.basel = hasI('i9') ? sc(lg(S.inf.ip.add(1)).mul(hasB('b9') ? 0.75 : 0.5), 500) : new Decimal(0);
+  X = X.add(C.basel);
+
+  C.lind = hasT('t1') ? sc(lg(S.tr.tp.add(1)).mul(3), 2e4) : new Decimal(0);
+  X = X.add(C.lind);
+  if (hasT('t10')) X = X.add(Math.log10(1729) * Math.sqrt(S.tr.cnt));
+  C.X = X;
+  // 各阶倍率（对数）
+  C.genLog = [];
+  C.zeno = hasI('i1') ? Math.log10(1 + S.time.all / 60) * 0.25 : 0;
+  C.cantor = hasI('i4') ? sc(Math.log10(1 + S.inf.cnt) * 0.5, 4).toNumber() : 0;
+  const intrBase = lg(C.boostMult).add(lg(C.spdMult)).add(Math.log10(1.03) * C.achN).add(C.zeno).add(C.cantor);
+  for (let k = 0; k < 8; k++) {
+    let L = intrBase.add(Math.log10(B) * Math.floor(S.gens[k].b / 10));
+    if (hasTh(1) && k < 2) L = L.add(Math.log10(3));
+    if (k === 0) L = L.add(Math.log10(2) * C.mers);
+    if (hasTh(6)) L = L.add(Math.log10(k + 1));
+    C.genLog[k] = k === 0 ? L.mul(E).add(X) : L.mul(E);
+  }
+  // 超运算塔高
+  C.hEff = hyEff();
+  // ∞ 点
+  C.ipMultLog = new Decimal(Math.log10(2) * S.inf.rep)
+    .add(hasI('i15') ? Math.log10(2) : 0)
+    .add(digitsFor('e') * 2 * Math.LOG10E)
+    .add(hasB('b3') ? sc(Math.log10(1 + S.inf.cnt) * 0.3, 30) : 0)
+    .add(hasB('b8') ? 3 : 0)
+    .add(hasT('t3') ? Math.log10(1 + S.tr.cnt) * 2 : 0);
+  C.igW = hasB('b7') ? 1.5 : 1;
+  { let r = 0; S.inf.g.forEach((g, j) => { r += (j + 1) * (j + 1) * g.b; });
+    C.ieRate = new Decimal((TUNE.ier ?? 5e-4) * r * C.igW * (1 + digitsFor('phi') * 0.05)); }
+  // 超越点
+  C.tpMultLog = new Decimal(Math.log10(1 + digitsFor('gamma')) * 2).add(hasT('t9') ? 1 : 0).add(S.tr.fr * Math.log10(1.585));
+  // 基数
+  C.kMultLog = new Decimal(hasZ('z3') ? Math.log10(2) : 0).add(hasZ('z8') ? Math.log10(1 + S.st.s / 10) : 0);
+  C.sRate = setRate();
+}
+
+function hyEff() { return S.hy.h; }
+function hyRate() {
+  let r = (TUNE.hr0 ?? 4e-6);
+  const mul = { h1: 2, h2: 2, h4: 2, h6: 2, h7: 1.5, h9: 1.5, h10: 1.5 };
+  for (const id in mul) if (hasH(id)) r *= mul[id];
+  if (hasP('p3')) r *= 10;
+  r *= 1 + (TUNE.hrk ?? 0.08) * S.hy.rep;
+  return r;
+}
+function peRate() {
+  let r = (TUNE.pr0 ?? 4.5e-6);
+  const mul = { p1: 2, p2: 2, p4: 2, p5: 1.6, p7: 1.6, p8: 1.5, p9: 1.5, p10: 1.4, p11: 1.3 };
+  for (const id in mul) if (hasP(id)) r *= mul[id];
+  r *= 1 + (TUNE.prk ?? 0.06) * S.pt.rep;
+  // 抵达 10↑↑↑10 之后越来越慢
+  if (S.pt.p > END_P) r /= Math.pow(10, (S.pt.p - END_P) * 0.6);
+  return r;
+}
+function setRate() {
+  if (S.st.al <= 0) return 0;
+  let r = (TUNE.sr ?? 6e-5) * Math.pow(S.st.al, hasZ('z7') ? 1.2 : 1);
+  if (hasZ('z5')) r *= 2;
+  if (hasZ('z9')) r *= 2;
+  if (hasH('h3')) r *= 3;
+  if (hasH('h8')) r *= 5;
+  return r;
+}
+
+/* ---------- 增益预估 ---------- */
+function ipGain() {
+  let base;
+  if (!S.inf.brk || S.inf.chal) base = canCrunch() ? new Decimal(1) : new Decimal(0);
+  else base = S.n.gte(INF) ? pow10(lg(S.n).div(308).sub(0.75)).floor().max(1) : new Decimal(0);
+  return base.mul(pow10(C.ipMultLog)).floor();
+}
+function tpGain() {
+  const L = lg(S.n);
+  if (L.lt(TR_REQ)) return new Decimal(0);
+  return pow10(L.div(TR_REQ).sub(1).add(C.tpMultLog)).floor();
+}
+function kGain() {
+  const L = lg(S.n);
+  if (L.lt(FO_REQ)) return new Decimal(0);
+  let k = L.div(FO_REQ).pow(0.5);
+  if (hasH('h6')) k = k.pow(1.5);
+  return k.mul(pow10(C.kMultLog)).floor();
+}
+function slogN() { return S.n.lte(1) ? 0 : S.n.slog(10).toNumber(); }
+
+/* ============================================================
+   购买操作
+   ============================================================ */
+function tiersOpen() { return Math.min(8, 4 + S.boost); }
+function genUnitCost(k) { return genCost(k).cost(Math.floor(S.gens[k].b / 10)); }
+function buyGen(k, mode = 'one', budget = null) {   // one | ten | max
+  if (k >= tiersOpen()) return false;
+  const g = S.gens[k], cost = genCost(k);
+  let bought = false;
+  for (let guard = 0; guard < 40; guard++) {
+    const grp = Math.floor(g.b / 10), price = cost.cost(grp), rem = 10 - g.b % 10;
+    const cash = budget ? Decimal.min(budget, S.n) : S.n;
+    if (cash.lt(price)) break;
+    if (mode === 'one') { S.n = S.n.sub(price).max(0); g.b++; g.a = g.a.add(1); return true; }
+    if (cash.gte(price.mul(rem))) { S.n = S.n.sub(price.mul(rem)).max(0); if (budget) budget = budget.sub(price.mul(rem)); g.b += rem; g.a = g.a.add(rem); bought = true; }
+    else { const u = Math.floor(cash.div(price).toNumber()); if (u > 0 && (mode === 'max' || mode === 'grp')) { S.n = S.n.sub(price.mul(u)).max(0); g.b += u; g.a = g.a.add(u); bought = true; } break; }
+    if (mode === 'ten' || mode === 'grp') break;
+    const cash2 = budget ? Decimal.min(budget, S.n) : S.n;
+    const r = bulk(cost, Math.floor(g.b / 10), cash2.div(10));
+    if (r && r.n - 1 > Math.floor(g.b / 10) + 1) {
+      const add = (r.n - 1 - Math.floor(g.b / 10)) * 10;
+      S.n = S.n.sub(r.spent.mul(10)).max(0); if (budget) budget = budget.sub(r.spent.mul(10)).max(0);
+      g.b += add; g.a = g.a.add(add);
+    }
+  }
+  return bought;
+}
+function buySpd(max = true, budget = null) {
+  if (inC(1)) return false;
+  const cash = budget ? Decimal.min(budget, S.n) : S.n;
+  const r = bulk(SPD_COST, S.spd, cash, max ? Infinity : 1);
+  if (!r) return false;
+  S.n = S.n.sub(r.spent).max(0); S.spd = r.n; return true;
+}
+// 均衡的“全部最大”：先各用千分之一预算批量购买，再按价格从低到高逐组购买
+function buyMaxAll() {
+  let any = false;
+  const open = tiersOpen();
+  const bud = S.n.div(1000);
+  if (bud.gt(1e6)) {
+    for (let k = open - 1; k >= 0; k--) any = buyGen(k, 'max', bud) || any;
+    any = buySpd(true, bud) || any;
+  }
+  for (let it = 0; it < 60; it++) {
+    let best = -1, bp = null;
+    for (let k = 0; k < open; k++) { const p = genUnitCost(k); if (!bp || p.lt(bp)) { bp = p; best = k; } }
+    const sp = inC(1) ? null : SPD_COST.cost(S.spd);
+    if (sp && sp.lt(bp)) { if (S.n.lt(sp)) break; buySpd(false); any = true; continue; }
+    if (S.n.lt(bp)) break;
+    buyGen(best, 'grp'); any = true;
+  }
+  return any;
+}
+function clickN() { S.clicks++; S.n = S.n.add(1); }
+function buyTh(id) {
+  const t = THEOREMS[id - 1];
+  if (S.th[id] || S.n.lt(pow10(t.c))) return false;
+  S.n = S.n.sub(pow10(t.c)); S.th[id] = true; return true;
+}
+function buySieve(max = true) {
+  if (!unl.sieve()) return false;
+  const r = bulk(SIEVE_COST, S.sv.lv, S.n, max ? Infinity : 1);
+  if (!r) return false;
+  S.n = S.n.sub(r.spent).max(0); S.sv.lv = r.n; return true;
+}
+
+/* ---------- 数位扩展 / 进制跃迁 ---------- */
+function boostReq() {
+  if (S.boost < 4) return { tier: 4 + S.boost - 1, amt: 20 };
+  return { tier: 7, amt: 20 + 15 * (S.boost - 4) };
+}
+function canBoost() {
+  if (inC(4) && S.boost >= 5) return false;
+  const r = boostReq(); return S.gens[r.tier].b >= r.amt;
+}
+function resetGens(keepBoost) {
+  S.n = hasI('i14') ? D(1e25) : D(10);
+  for (const g of S.gens) { g.a = D(0); g.b = 0; }
+  S.spd = 0;
+  if (!keepBoost) S.boost = (hasI('i2') && !inC(4)) ? 4 : 0;
+}
+function doBoost() {
+  if (!canBoost()) return false;
+  // 批量：若满足多次（在 8 阶之后）
+  if (S.boost >= 4) {
+    const t8 = S.gens[7].b; let n = Math.floor((t8 - 20) / 15) + 5;
+    if (inC(4)) n = Math.min(n, 5);
+    S.boost = Math.max(S.boost + 1, n);
+  } else S.boost++;
+  if (!(S.inf.brk && !S.inf.chal)) resetGens(true);
+  return true;
+}
+function baseReq() { return Math.max(20, 80 + 60 * S.base - (hasI('i13') ? 10 : 0)); }
+function canBase() { return !inC(3) && S.gens[7].b >= baseReq() && (S.au.baseMax <= 0 || S.base < S.au.baseMax || !S._auto); }
+function doBase() {
+  if (inC(3) || S.gens[7].b < baseReq()) return false;
+  if (S.inf.brk && !S.inf.chal) {   // 打破无穷后：进制跃迁不再重置，并可一次进行多次
+    const t8 = S.gens[7].b, off = hasI('i13') ? 10 : 0;
+    S.base = Math.max(S.base + 1, Math.floor((t8 - 80 + off) / 60) + 1);
+    return true;
+  }
+  S.base++;
+  resetGens(false);
+  return true;
+}
+
+/* ============================================================
+   无穷
+   ============================================================ */
+function canCrunch() { return S.inf.chal ? S.n.gte(chalGoal(S.inf.chal)) : S.n.gte(INF); }
+function resetInfLayer0() {
+  resetGens(false);
+  S.base = 0;
+  if (!hasI('i3')) S.th = {};
+  if (!hasI('i8')) S.sv = { x: D(2), lv: 0 };
+  S.time.inf = 0;
+}
+function doCrunch(force) {
+  if (!canCrunch()) return false;
+  const g = ipGain();
+  S.inf.ip = S.inf.ip.add(g); S.inf.tot = S.inf.tot.add(g);
+  const ipm = g.div(Math.max(S.time.inf, 1) / 60);
+  if (ipm.gt(S.stat.peakIPm)) S.stat.peakIPm = ipm;
+  S.inf.cnt++;
+  S.inf.fast = Math.min(S.inf.fast, S.time.inf);
+  if (S.inf.chal) {
+    if (!S.inf.done[S.inf.chal]) emit('chal', S.inf.chal);
+    S.inf.done[S.inf.chal] = true; S.inf.chal = 0;
+    if ([1, 2, 3, 4, 5, 6, 7, 8].every(i => S.inf.done[i]) && !S.inf.brk) { S.inf.brk = true; emit('break'); }
+  }
+  if (S.inf.cnt === 1 && S.tr.cnt === 0 && S.st.cnt === 0) emit('firstInf');
+  resetInfLayer0();
+  return true;
+}
+function startChal(i) {
+  if (S.inf.chal === i) return false;
+  if (S.n.gte(INF) && !S.inf.chal) doCrunch();
+  S.inf.chal = i;
+  resetInfLayer0();
+  recalc();
+  return true;
+}
+function exitChal() { S.inf.chal = 0; resetInfLayer0(); }
+function buyIU(id) {
+  const u = INFU.find(x => x.id === id);
+  if (!u || S.inf.upg[id]) return false;
+  const idx = INFU.indexOf(u);
+  if (idx > 0 && !S.inf.upg[INFU[idx - 1].id]) return false;
+  if (S.inf.ip.lt(u.c)) return false;
+  S.inf.ip = S.inf.ip.sub(u.c); S.inf.upg[id] = true; return true;
+}
+function buyBU(id) {
+  const u = BRKU.find(x => x.id === id);
+  if (!u || S.inf.upg[id] || !S.inf.brk) return false;
+  const idx = BRKU.indexOf(u);
+  if (idx > 0 && !S.inf.upg[BRKU[idx - 1].id]) return false;
+  if (S.inf.ip.lt(pow10(u.c))) return false;
+  S.inf.ip = S.inf.ip.sub(pow10(u.c)); S.inf.upg[id] = true; return true;
+}
+function buyRep(max = true) {
+  const r = bulk(REP_COST, S.inf.rep, S.inf.ip, max ? Infinity : 1);
+  if (!r) return false;
+  S.inf.ip = S.inf.ip.sub(r.spent).max(0); S.inf.rep = r.n; return true;
+}
+function buyIG(j, max = true) {
+  if (!unl.igen()) return false;
+  const g = S.inf.g[j];
+  const r = bulk(igenCost(j), g.b, S.inf.ip, max ? Infinity : 1);
+  if (!r) return false;
+  S.inf.ip = S.inf.ip.sub(r.spent).max(0); g.a = g.a.add(r.n - g.b); g.b = r.n; return true;
+}
+
+/* ============================================================
+   超越
+   ============================================================ */
+function canTrans() { return S.inf.brk && !S.inf.chal && lg(S.n).gte(TR_REQ); }
+function resetTrLayer() {
+  const keepBrk = trMile(1);
+  S.inf.ip = trMile(8) ? D(1e6) : D(0);
+  S.inf.cnt = 0; S.inf.rep = 0; S.inf.fast = 1e300;
+  S.inf.g = IGENS.map(() => ({ a: D(0), b: 0 }));
+  const up = {};
+  for (const id in S.inf.upg) {
+    if (id[0] === 'i' && trMile(2)) up[id] = true;
+    if (id[0] === 'b' && trMile(3)) up[id] = true;
+  }
+  S.inf.upg = up;
+  if (!keepBrk) { S.inf.brk = false; S.inf.done = {}; }
+  S.inf.chal = 0;
+  S.time.tr = 0;
+  resetInfLayer0();
+  S.sv = { x: D(2), lv: 0 };
+  S.th = {};
+}
+function doTrans() {
+  if (!canTrans()) return false;
+  const g = tpGain();
+  S.tr.tp = S.tr.tp.add(g); S.tr.tot = S.tr.tot.add(g);
+  if (S.tr.cnt === 0 && S.st.cnt === 0) emit('firstTr');
+  S.tr.cnt++;
+  S.tr.fast = Math.min(S.tr.fast, S.time.tr);
+  resetTrLayer();
+  return true;
+}
+function buyConst(id, max = true) {
+  const c = CONSTS.find(x => x.id === id);
+  const r = bulk(constCost(c), S.tr.dg[id], S.tr.tp, max ? Infinity : 1);
+  if (!r) return false;
+  S.tr.tp = S.tr.tp.sub(r.spent).max(0); S.tr.dg[id] = r.n; return true;
+}
+function buyTU(id) {
+  const u = TRU.find(x => x.id === id);
+  if (!u || S.tr.upg[id] || S.tr.tp.lt(pow10(u.c))) return false;
+  S.tr.tp = S.tr.tp.sub(pow10(u.c)); S.tr.upg[id] = true; return true;
+}
+function buyFrac(max = true) {
+  if (!unl.frac()) return false;
+  const r = bulk(FRAC_COST, S.tr.fr, S.tr.tp, max ? Infinity : 1);
+  if (!r) return false;
+  S.tr.tp = S.tr.tp.sub(r.spent).max(0); S.tr.fr = r.n; return true;
+}
+
+/* ============================================================
+   集合论（力迫）
+   ============================================================ */
+function canForce() { return lg(S.n).gte(FO_REQ) && !S.inf.chal; }
+function doForce() {
+  if (!canForce()) return false;
+  const g = kGain();
+  S.st.k = S.st.k.add(g); S.st.tot = S.st.tot.add(g);
+  if (S.st.cnt === 0) emit('firstFo');
+  S.st.cnt++;
+  S.tr.tp = D(0);
+  if (!hasZ('z1')) S.tr.upg = {};
+  if (!hasZ('z4')) S.tr.dg = { pi: 0, e: 0, phi: 0, sqrt2: 0, gamma: 0 };
+  S.tr.fr = 0;
+  S.time.fo = 0;
+  resetTrLayer();
+  return true;
+}
+function buyAx(id) {
+  const u = AXIOMS.find(x => x.id === id);
+  if (!u || S.st.ax[id] || S.st.k.lt(pow10(u.c))) return false;
+  S.st.k = S.st.k.sub(pow10(u.c)); S.st.ax[id] = true; return true;
+}
+function buyAleph(max = true) {
+  const r = bulk(ALEPH_COST, S.st.al, S.st.k, max ? Infinity : 1);
+  if (!r) return false;
+  S.st.k = S.st.k.sub(r.spent).max(0); S.st.al = r.n; return true;
+}
+
+/* ============================================================
+   超运算
+   ============================================================ */
+function buyHU(id) {
+  const u = HYU.find(x => x.id === id);
+  if (!u || S.hy.upg[id] || !S.hy.on) return false;
+  if (slogN() < u.c) return false;
+  S.hy.upg[id] = true; return true;
+}
+function buyHRep() {
+  if (!S.hy.on) return false;
+  const s = slogN(); let any = false;
+  for (let g = 0; g < 200 && s >= hrepNextAt(S.hy.rep); g++) { S.hy.rep++; any = true; }
+  return any;
+}
+function buyPU(id) {
+  const u = PEU.find(x => x.id === id);
+  if (!u || S.pt.upg[id] || !S.pt.on || S.pt.p < u.c) return false;
+  S.pt.upg[id] = true; return true;
+}
+function buyPRep() {
+  if (!S.pt.on) return false;
+  let any = false;
+  for (let g = 0; g < 200 && S.pt.p >= prepNextAt(S.pt.rep); g++) { S.pt.rep++; any = true; }
+  return any;
+}
+// 当前“显示用”的数的五级高度（未解锁时返回 null）
+function pentHeight() {
+  if (!S.pt.on) return null;
+  return S.pt.p;
+}
+
+/* ============================================================
+   主循环
+   ============================================================ */
+let emit = () => {};
+function setEmitter(fn) { emit = fn; }
+
+function autos() {
+  const A = S.au;
+  S._auto = true;
+  if (hasI('i3') && A.th) for (const t of THEOREMS) buyTh(t.id);
+  if (hasI('i5') || trMile(1)) {
+    if (A.gen && A.spd) buyMaxAll();
+    else { if (A.gen) for (let k = tiersOpen() - 1; k >= 0; k--) buyGen(k, 'max', S.n.div(4)); if (A.spd) buySpd(true); }
+  }
+  if (hasI('i8') && A.sieve) buySieve(true);
+  if (hasI('i6') || trMile(1)) {
+    if (A.base && canBase() && (A.baseMax <= 0 || S.base < A.baseMax)) doBase();
+    if (A.boost) for (let i = 0; i < 3 && canBoost(); i++) doBoost();
+  }
+  if (trMile(5)) {
+    if (A.igen) for (let j = 3; j >= 0; j--) buyIG(j, true);
+    if (A.rep) buyRep(true);
+  }
+  if (trMile(2) && A.iupg) { for (const u of INFU) buyIU(u.id); if (S.inf.brk) for (const u of BRKU) buyBU(u.id); }
+  if ((hasI('i12') || trMile(1)) && A.cr && canCrunch()) {
+    if (!S.inf.brk || S.inf.chal) doCrunch();
+    else {
+      const g = ipGain();
+      let ok = false;
+      if (A.crMode === 0) ok = g.gte(D(A.crVal || 1));
+      else if (A.crMode === 1) ok = S.time.inf >= Number(A.crVal || 0);
+      else ok = g.gte(S.inf.ip.mul(Number(A.crVal || 1)));
+      if (ok) doCrunch();
+    }
+  }
+  if (trMile(40) && A.cst) for (const c of CONSTS) buyConst(c.id, true);
+  if (trMile(12) && A.tr && canTrans()) {
+    const g = tpGain();
+    const ok = A.trMode === 0 ? g.gte(D(A.trVal || 1)) : S.time.tr >= Number(A.trVal || 0);
+    if (ok) doTrans();
+  }
+  if (hasZ('z6') && A.fo && canForce()) {
+    if (kGain().gte(S.st.k.mul(Number(A.foVal || 2)).max(1))) doForce();
+  }
+  if (S.hy.on && A.hy) for (const u of HYU) buyHU(u.id);
+  if (S.hy.on && A.hrep) buyHRep();
+  if (S.pt.on && A.hy) for (const u of PEU) buyPU(u.id);
+  if (S.pt.on && A.hrep) buyPRep();
+  S._auto = false;
+}
+
+function produce(dt) {
+  // 计数器链
+  const open = tiersOpen();
+  const rate = [];
+  for (let k = 0; k < 8; k++) rate[k] = k < open ? S.gens[k].a.mul(pow10(C.genLog[k])) : new Decimal(0);
+  for (let k = 0; k < 7; k++) if (k + 1 < open) S.gens[k].a = S.gens[k].a.add(rate[k + 1].mul(dt));
+  let P = rate[0];
+  if (C.hEff > 0 && P.gt(10)) P = P.layeradd10(C.hEff);
+  C.P = P;
+  S.n = S.n.add(P.mul(dt));
+  if ((!S.inf.brk || S.inf.chal) && S.n.gt(INF)) S.n = INF;
+  // 质数筛
+  if (unl.sieve() && !inC(2)) S.sv.x = S.sv.x.add(C.sieveSpd.mul(dt));
+  // ∞ 发生器
+  if (unl.igen()) {
+    S.inf.ie = S.inf.ie.add(C.ieRate.mul(dt));
+  }
+  // 被动超越点
+  if (S.inf.brk && (trMile(20) || hasZ('z2'))) {
+    const p = (hasZ('z2') ? 0.1 : 0) + (trMile(20) ? 0.01 : 0);
+    const g = tpGain();
+    if (g.gt(0)) { S.tr.tp = S.tr.tp.add(g.mul(p * dt)); S.tr.tot = S.tr.tot.add(g.mul(p * dt)); }
+  }
+  if (C.teRate > 0) S.tr.te += C.teRate * dt;
+  // 集合增长
+  if (C.sRate > 0) S.st.s += C.sRate * dt;
+  // 塔高
+  if (S.hy.on) S.hy.h += hyRate() * dt;
+  if (!S.hy.on && lg(S.n).gte(HY_REQ)) { S.hy.on = true; emit('hyper'); }
+  if (S.pt.on) S.pt.p += peRate() * dt;
+  if (!S.pt.on && S.hy.on && slogN() >= PENT_REQ) { S.pt.on = true; S.pt.p = Math.max(S.pt.p, 2); emit('pent'); }
+}
+
+let achTimer = 0;
+function tick(dt) {
+  if (!(dt > 0)) return;
+  S.time.all += dt; S.time.inf += dt; S.time.tr += dt; S.time.fo += dt;
+  recalc();
+  autos();
+  recalc();
+  produce(dt);
+  if (S.n.gt(S.maxN)) S.maxN = S.n;
+  if (S.inf.chal && canCrunch()) doCrunch();
+  else if (!S.inf.brk) {
+    if (S.n.gte(INF) && S.inf.cnt === 0 && S.tr.cnt === 0 && S.st.cnt === 0) doCrunch();
+  }
+  achTimer += dt;
+  if (achTimer >= 0.5) { achTimer = 0; checkAch(); }
+  const sl = slogN();
+  if (sl > S.stat.maxSlog) S.stat.maxSlog = sl;
+  if (!S.end.done && S.pt.on && S.pt.p >= END_P) { S.end.done = true; S.end.time = S.time.all; emit('end'); }
+}
+
+/* ============================================================
+   成就
+   ============================================================ */
+const ACH = [];
+function A(id, n, d, f) { ACH.push({ id, n, d, f }); }
+const g8 = k => S.gens[k].b > 0;
+A(11, '第一根手指', '购买一个手指', () => g8(0));
+A(12, '掰着手指算', '拥有 10 个手指', () => S.gens[0].b >= 10);
+A(13, '珠算口诀', '购买一个算盘', () => g8(2));
+A(14, '对数尺', '购买一把计算尺', () => g8(4));
+A(15, '齿轮轰鸣', '购买一台差分机', () => g8(5));
+A(16, '图灵完备', '购买一台电子计算机', () => g8(6));
+A(17, '薛定谔的计数器', '购买一台量子计算机', () => g8(7));
+A(18, '多一位', '进行一次数位扩展', () => S.boost >= 1 || S.inf.cnt > 0 || S.tr.cnt > 0);
+A(21, '逢二进一', '进行一次进制跃迁', () => S.base >= 1 || S.inf.cnt > 1);
+A(22, '定理证明者', '证明第一个定理', () => Object.keys(S.th).length > 0);
+A(23, '筛子转起来', '解锁质数筛', () => unl.sieve());
+A(24, '一百个质数', '找到 100 个质数', () => C.pi && C.pi.gte(100));
+A(25, '梅森的礼物', '发现 10 个梅森质数', () => C.mers >= 10);
+A(26, '一摩尔', '数达到 6.022×10²³', () => S.maxN.gte('6.022e23'));
+A(27, '数遍宇宙', '数达到 10⁸⁰', () => S.maxN.gte(1e80));
+A(28, '古戈尔', '数达到 10¹⁰⁰', () => S.maxN.gte(1e100));
+A(31, '∞', '首次抵达无穷', () => S.inf.cnt > 0 || S.tr.cnt > 0);
+A(32, '一小时的无穷', '在 1 小时内抵达无穷', () => S.inf.fast <= 3600);
+A(33, '十次无穷', '累计无穷 10 次', () => S.inf.cnt >= 10 || S.tr.cnt > 0);
+A(34, '猜想终结者', '证明一个猜想', () => Object.keys(S.inf.done).length >= 1);
+A(35, '半壁江山', '证明 4 个猜想', () => Object.keys(S.inf.done).length >= 4);
+A(36, '千禧年大奖', '证明全部 8 个猜想', () => Object.keys(S.inf.done).length >= 8);
+A(37, '超越 1.8×10³⁰⁸', '打破无穷', () => S.inf.brk);
+A(38, '无穷的能量', '获得 ∞ 能量', () => S.inf.ie.gt(0));
+A(41, '一千位', '数达到 10¹⁰⁰⁰', () => S.maxN.gte('1e1000'));
+A(42, '百次无穷', '累计无穷 100 次', () => S.inf.cnt >= 100 || S.tr.cnt > 0);
+A(43, '无穷多的无穷', '拥有 10¹⁰ ∞ 点', () => S.inf.ip.gte(1e10) || S.tr.cnt > 0);
+A(44, '超限归纳', '拥有超限发生器', () => S.inf.g[3].b > 0 || S.tr.cnt > 0);
+A(45, '一分钟的无穷', '在 1 分钟内抵达无穷', () => S.inf.fast <= 60);
+A(46, '十秒的无穷', '在 10 秒内抵达无穷', () => S.inf.fast <= 10);
+A(47, '万次无穷', '累计无穷 10000 次', () => S.inf.cnt >= 10000 || S.st.cnt > 0);
+A(48, '超越', '首次超越', () => S.tr.cnt > 0 || S.st.cnt > 0);
+A(51, 'π 的十位', '背下 π 的 10 位小数', () => digitsFor('pi') >= 10);
+A(52, 'e 的十位', '背下 e 的 10 位小数', () => digitsFor('e') >= 10);
+A(53, '黄金分割', '背下 φ 的 10 位小数', () => digitsFor('phi') >= 10);
+A(54, '无理之根', '背下 √2 的 10 位小数', () => digitsFor('sqrt2') >= 10);
+A(55, '神秘的 γ', '背下 γ 的 10 位小数', () => digitsFor('gamma') >= 10);
+A(56, '分形初现', '分形迭代 3 次', () => S.tr.fr >= 3);
+A(57, '百位圆周率', '背下 π 的 100 位小数', () => digitsFor('pi') >= 100);
+A(58, '最大已知质数', '数超过 2¹³⁶²⁷⁹⁸⁴¹ − 1', () => S.maxN.gte('1e41024320'));
+A(61, '百万位数', '数达到 10^(10⁶)', () => S.maxN.gte('ee6'));
+A(62, '力迫', '首次力迫', () => S.st.cnt > 0);
+A(63, 'ZFC', '获得全部 9 条公理', () => Object.keys(S.st.ax).length >= 9);
+A(64, 'ℵ₁', '拥有 ℵ₁', () => S.st.al >= 2);
+A(65, '连续统假设', '拥有 ℵ₁₀', () => S.st.al >= 11);
+A(66, '幂集爆炸', '集合大小达到 100', () => S.st.s >= 100);
+A(67, 'ℵ_ω', '拥有 ℵ₅₀', () => S.st.al >= 51);
+A(68, '古戈尔普勒克斯', '数达到 10^(10¹⁰⁰)', () => S.maxN.gte('ee100'));
+A(71, '第一支箭', '解锁超运算', () => S.hy.on);
+A(72, '宇宙状态数', '数达到 10^(10¹²²)', () => S.maxN.gte('ee122'));
+A(73, '塔高 3.5', '数达到 10↑↑3.5', () => S.stat.maxSlog >= 3.5);
+A(74, '塔高 3.8', '数达到 10↑↑3.8', () => S.stat.maxSlog >= 3.8);
+A(75, '10↑↑4', '数达到 10^10^10^10', () => S.maxN.gte('eee10'));
+A(76, '斯奎斯数', '数达到 eee34', () => S.maxN.gte('eee34'));
+A(77, '更高的塔', '数达到 eee100', () => S.maxN.gte('eee100'));
+A(78, '绝对无限的门槛', '数达到 eee200', () => S.maxN.gte('eee200'));
+A(81, '手动挡', '点击“数一数”100 次', () => S.clicks >= 100);
+A(82, '离线也在算', '获得一次离线进度', () => S.stat.offlineGot);
+A(83, '数学爱好者', '读完 50 条数学快讯', () => S.stat.newsRead >= 50);
+A(84, '宇宙的答案', '恰好拥有 42 个手指', () => S.gens[0].b === 42);
+A(85, '完全数', '某种计数器恰好有 28 或 496 个', () => S.gens.some(g => g.b === 28 || g.b === 496));
+A(86, '孪生', '手指与算筹数量相同且都不少于 50', () => S.gens[0].b >= 50 && S.gens[0].b === S.gens[1].b);
+A(87, 'π 日快乐', '在 3 月 14 日游玩', () => { const d = new Date(); return d.getMonth() === 2 && d.getDate() === 14; });
+A(88, '1729', '同时拥有 1 次进制跃迁、7 次数位扩展和 29 级运算速度', () => S.base === 1 && S.boost === 7 && S.spd === 29);
+function checkAch() {
+  for (const a of ACH) {
+    if (!S.ach[a.id]) { let ok = false; try { ok = a.f(); } catch (e) {} if (ok) { S.ach[a.id] = Date.now(); emit('ach', a); } }
+  }
+}
+
+/* ============================================================
+   存档
+   ============================================================ */
+const SAVE_KEY = 'shuzhita_save_v1';
+function serialize() {
+  return JSON.stringify(S, (k, v) => (v instanceof Decimal ? 'D|' + v.toString() : (k === '_auto' ? undefined : v)));
+}
+function revive(o) {
+  return JSON.parse(o, (k, v) => (typeof v === 'string' && v.startsWith('D|') ? new Decimal(v.slice(2)) : v));
+}
+function merge(base, src) {
+  if (src == null) return base;
+  if (base instanceof Decimal) return src instanceof Decimal ? src : D(src);
+  if (Array.isArray(base)) { return base.map((b, i) => merge(b, src[i])); }
+  if (typeof base === 'object' && base) {
+    const out = {};
+    const keys = new Set([...Object.keys(base), ...Object.keys(src)]);
+    for (const k of keys) out[k] = (k in base) ? merge(base[k], src[k]) : src[k];
+    return out;
+  }
+  return typeof src === typeof base ? src : base;
+}
+function loadFrom(str) {
+  const o = revive(str);
+  S = merge(newState(), o);
+  recalc();
+}
+function exportSave() { return btoa(unescape(encodeURIComponent(serialize()))); }
+function importSave(txt) {
+  const s = decodeURIComponent(escape(atob(txt.trim())));
+  const o = revive(s);
+  if (!o || !o.gens) throw new Error('bad');
+  S = merge(newState(), o); recalc();
+}
+function hardReset() { S = newState(); recalc(); }
+
+if (typeof module !== 'undefined') {
+  module.exports = { hrepNextAt, prepNextAt, Cost, clickN, buyGen, buyPU, buyPRep, PEU, peRate, REP_COST, get S() { return S; }, set S(v) { S = v; }, newState, tick, recalc, C, D, INF, buyMaxAll, buyTh, buySieve, doBoost, doBase, canBoost, canBase,
+    doCrunch, canCrunch, startChal, exitChal, buyIU, buyBU, buyRep, buyIG, canTrans, doTrans, tpGain, ipGain, kGain, buyConst, buyTU, buyFrac,
+    canForce, doForce, buyAx, buyAleph, buyHU, buyHRep, slogN, INFU, BRKU, THEOREMS, CHALS, CONSTS, TRU, AXIOMS, HYU, lg, unl, setEmitter, hyRate, trMile, inC, tiersOpen, ACH, serialize, loadFrom };
+}
+
+/* ============================================================
+   数之塔 · 界面
+   ============================================================ */
+const $ = (q, el = document) => el.querySelector(q);
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const k in props) {
+    const v = props[k];
+    if (k === 'class') el.className = v;
+    else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(c));
+  return el;
+}
+function setText(el, t) { if (el._t !== t) { el._t = t; el.textContent = t; } }
+function setHTML(el, t) { if (el._h !== t) { el._h = t; el.innerHTML = t; } }
+function setCls(el, c, on) { if (el.classList.contains(c) !== !!on) el.classList.toggle(c, !!on); }
+function show(el, on) { const d = on ? '' : 'none'; if (el.style.display !== d) el.style.display = d; }
+
+/* ---------- 数字格式化 ---------- */
+const CN_UNITS = [[1e68, '无量大数'], [1e64, '不可思议'], [1e60, '那由他'], [1e56, '阿僧祇'], [1e52, '恒河沙'], [1e48, '极'], [1e44, '载'], [1e40, '正'], [1e36, '涧'], [1e32, '沟'], [1e28, '穰'], [1e24, '秭'], [1e20, '垓'], [1e16, '京'], [1e12, '兆'], [1e8, '亿'], [1e4, '万']];
+function commas(n) { return Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function fmtSmall(n, dp) {
+  if (n === 0) return '0';
+  if (n < 0.001) return n.toExponential(1);
+  if (n < 10) return n.toFixed(dp);
+  if (n < 100) return n.toFixed(Math.min(dp, 1));
+  if (n < 1e6) return commas(n);
+  return null;
+}
+function fmt(x, dp = 2) {
+  x = D(x);
+  if (x.sign < 0) return '−' + fmt(x.neg(), dp);
+  if (!x.isFinite || !Number.isFinite(x.mag)) return '∞';
+  if (x.lt(1e6)) return fmtSmall(x.toNumber(), dp) ?? commas(x.toNumber());
+  const sl = x.slog(10).toNumber();
+  if (sl >= 6) return '10↑↑' + sl.toFixed(3);
+  const L = x.log10();
+  const nota = S ? S.opt.nota : 'sci';
+  if (L.lt(1e6)) {
+    const Ln = L.toNumber();
+    if (nota === 'log') return 'e' + Ln.toFixed(2);
+    if (nota === 'cn' && Ln < 72) {
+      for (const [v, u] of CN_UNITS) if (x.toNumber() >= v) return (x.toNumber() / v).toFixed(2) + u;
+    }
+    let e = Math.floor(Ln), m = Math.pow(10, Ln - e);
+    if (m >= 9.995) { m = 1; e++; }
+    if (nota === 'eng') { const r = ((e % 3) + 3) % 3; return (m * Math.pow(10, r)).toFixed(dp) + 'e' + commas(e - r); }
+    return m.toFixed(dp) + 'e' + commas(e);
+  }
+  return 'e' + fmt(L, dp);
+}
+function fmtN(n) { if (n >= 1e9) return fmt(D(n)); return commas(n); }
+function fmtX(x) { return '×' + fmt(x); }
+function fmtTime(s) {
+  if (!Number.isFinite(s) || s > 3e13) return '很久';
+  if (s < 1) return s.toFixed(2) + ' 秒';
+  if (s < 60) return s.toFixed(1) + ' 秒';
+  if (s < 3600) return Math.floor(s / 60) + ' 分 ' + Math.floor(s % 60) + ' 秒';
+  if (s < 86400) return Math.floor(s / 3600) + ' 小时 ' + Math.floor(s % 3600 / 60) + ' 分';
+  return Math.floor(s / 86400) + ' 天 ' + Math.floor(s % 86400 / 3600) + ' 小时';
+}
+// 数学排版：主数字
+function sup(s) { return '<sup>' + s + '</sup>'; }
+function mantExp(L) {   // L < 1e6 (number)
+  let e = Math.floor(L), m = Math.pow(10, L - e);
+  if (m >= 9.9995) { m = 1; e++; }
+  return { m, e };
+}
+function heroHTML(x) {
+  if (S.pt.on && S.pt.p > 2) return '10<span class="arr">↑↑↑</span>' + S.pt.p.toFixed(4);
+  x = D(x);
+  if (x.lt(1e6)) { const n = x.toNumber(); return n < 10 ? n.toFixed(1) : commas(n); }
+  const sl = x.slog(10).toNumber();
+  if (sl >= 6) return '10<span class="arr">↑↑</span>' + sl.toFixed(4);
+  let v = x, d = 0;
+  while (v.gte(1e6) && d < 6) { v = v.log10(); d++; }
+  // d=1：x < 10^(10^6)
+  if (d === 1) { const { m, e } = mantExp(x.log10().toNumber()); return m.toFixed(3) + '<span class="x">×</span>10' + sup(commas(e)); }
+  // d≥2：取 d-1 次对数后得到 [1e6, 1e1e6) 的值，作塔顶
+  let top = x; for (let i = 0; i < d - 1; i++) top = top.log10();
+  const { m, e } = mantExp(top.log10().toNumber());
+  let inner = m.toFixed(2) + '<span class="x">×</span>10' + sup(commas(e));
+  for (let i = 0; i < d - 1; i++) inner = '10' + sup(inner);
+  return inner;
+}
+
+/* ---------- 浮层 ---------- */
+function toast(html, ms = 4200) {
+  const t = h('div', { class: 'toast', html });
+  $('#toasts').append(t);
+  setTimeout(() => t.remove(), ms);
+  while ($('#toasts').children.length > 4) $('#toasts').firstChild.remove();
+}
+function modal({ glyph, title, body, acts }) {
+  const box = $('#modalBox');
+  box.innerHTML = '';
+  if (glyph) box.append(h('div', { class: 'glyph' }, glyph));
+  box.append(h('h2', null, title));
+  if (typeof body === 'string') box.append(h('div', { html: body })); else if (body) box.append(body);
+  const row = h('div', { class: 'acts' });
+  for (const a of acts || [{ t: '好的' }]) row.append(h('button', { class: 'btn' + (a.red ? ' red can' : ''), onclick: () => { closeModal(); a.f && a.f(); } }, a.t));
+  box.append(row);
+  $('#modal').classList.add('on');
+  setTimeout(() => { const b = row.querySelector('button:last-child'); b && b.focus(); }, 30);
+}
+function closeModal() { $('#modal').classList.remove('on'); }
+function confirmDo(title, text, f) {
+  if (!S.opt.conf) { f(); return; }
+  modal({ title, body: '<p>' + text + '</p>', acts: [{ t: '取消' }, { t: '确定', red: true, f }] });
+}
+
+/* ---------- 存档 ---------- */
+function save() {
+  S.last = Date.now();
+  try { localStorage.setItem(SAVE_KEY, serialize()); } catch (e) {}
+}
+function load() {
+  let str = null;
+  try { str = localStorage.getItem(SAVE_KEY); } catch (e) {}
+  if (str) { try { loadFrom(str); return true; } catch (e) { console.warn(e); } }
+  S = newState(); recalc();
+  return false;
+}
+function applyTheme() {
+  const t = S.opt.theme;
+  if (t === 'auto') document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', t);
+}
+
+/* ---------- 事件 ---------- */
+const STORY = {
+  firstInf: { glyph: '∞', title: '你数到了无穷', body: '<p>1.7976931348623157 × 10³⁰⁸ —— 双精度浮点数能表示的最大值。再往后，计算机只会回答 <span class="it">Infinity</span>。</p><p>一切重新开始，但你带走了 1 个 ∞ 点。新的章节已经打开：<b>§4 无穷</b> 与 <b>§5 猜想</b>。</p>' },
+  break: { glyph: '∎', title: '八个猜想，全部证明', body: '<p>你可以越过 1.8 × 10³⁰⁸ 继续数下去了。之后每次无穷获得的 ∞ 点，取决于你数得有多远。数位扩展和进制跃迁也不再重置任何东西。</p><p>新的升级已在 §4 中出现。</p>' },
+  firstTr: { glyph: 'π', title: '超越', body: '<p>π 不是任何整系数多项式的根——它超越了代数。</p><p>你带着超越点重新出发。去 <b>§6 超越</b> 背诵常数的位数吧，每一位都在让数变得更大。</p>' },
+  firstFo: { glyph: '⊢', title: '力迫', body: '<p>你用科恩的力迫法构造了一个新的集合论模型。在这里，连续统可以是 ℵ₂、ℵ₃……</p><p><b>§7 集合</b> 已打开。集合的大小会一直保留，它决定了数的指数。</p>' },
+  hyper: { glyph: '↑↑', title: '古戈尔普勒克斯', body: '<p>10 的古戈尔次方。写下它所需的纸，比可观测宇宙还大。</p><p>加法、乘法、乘方都不够用了。<b>§8 超运算</b>：现在要比的是指数塔有多高。</p>' },
+  pent: { glyph: '↑↑↑', title: '十层的塔', body: '<p>10↑↑10：十个 10 叠成的指数塔，Bowers 叫它 <i>decker</i>。</p><p>塔本身也该迭代了。<b>§9 五级运算</b>：数 = 10↑↑↑p，把 p 推到 10。</p>' },
+};
+function onEmit(type, a) {
+  if (type === 'ach') { toast('<b>成就达成：' + a.n + '</b><br>' + a.d); UI.notify.ach = true; return; }
+  if (type === 'chal') { toast('<b>证明完成：' + CHALS[a - 1].n + '</b><br>奖励：' + CHALS[a - 1].r); return; }
+  if (type === 'end') { showEnding(); return; }
+  const st = STORY[type];
+  if (st && !UI.offline) modal(st);
+  else if (st) UI.pendingStory.push(st);
+  if (type === 'firstInf') UI.notify.inf = true;
+}
+function showEnding() {
+  if (UI.offline) { UI.pendingEnd = true; return; }
+  S.end.seen = true;
+  modal({
+    glyph: '10↑↑↑10', title: 'tridecal',
+    body: '<p>你从 1 开始，一路数到了 10↑↑↑10 —— 十层的五级运算。在 Jonathan Bowers 的命名里，它叫 <i>tridecal</i>。</p>'
+      + '<p>用时 <b>' + fmtTime(S.end.time) + '</b>，抵达无穷 ' + fmtN(S.inf.cnt) + ' 次，超越 ' + fmtN(S.tr.cnt) + ' 次，力迫 ' + fmtN(S.st.cnt) + ' 次，背下了 π 的 ' + fmtN(digitsFor('pi')) + ' 位。</p>'
+      + '<p>1.0.0 版本的旅程到此为止。数还可以继续变大，无限升级也还能继续买，只是会越来越慢。谢谢你陪这座塔一直数下去。</p>',
+    acts: [{ t: '继续数下去' }],
+  });
+}
+
+/* ---------- 快讯 ---------- */
+const NEWS = [
+  '1 不是质数。数学家为此争论了好几百年。',
+  '0.999… 等于 1。如果你不信，算算 1 − 0.999… 等于多少。',
+  '一张纸对折 42 次，厚度就能到达月球。可惜你折不到第 8 次。',
+  '“古戈尔”是一个九岁孩子起的名字。',
+  '在 23 个人中，有两人同一天生日的概率超过 50%。',
+  '希尔伯特旅馆客满了。没关系，请每位客人搬到房号翻倍的房间。',
+  '有理数和整数一样多，实数却多得多。康托尔因此被同行攻击了半辈子。',
+  '拉马努金在病床上说：1729 是能用两种方式写成两个立方数之和的最小数。',
+  'π 的小数点后第 762 位开始，连续出现六个 9，人称“费曼点”。',
+  'e 的前几位 2.718281828 中，1828 连续出现了两次——别被骗了，后面没有规律。',
+  '哥德尔证明了：足够强的数学系统里，总有真命题无法被证明。',
+  '四色定理是第一个主要靠计算机证明的大定理。',
+  '费马在书页边写道：“我发现了一个绝妙的证明，可惜这里空白太小。”',
+  '怀尔斯花了七年证明费马大定理，然后又花了一年修补一个漏洞。',
+  '庞加莱猜想的证明者佩雷尔曼拒绝了菲尔兹奖和一百万美元。',
+  '考拉兹猜想：任取正整数，偶数除以 2，奇数乘 3 加 1，最终都会回到 1。没人知道为什么。',
+  '目前已知最大的质数有 41,024,320 位，是一个梅森质数。',
+  '葛立恒数大到：如果你的大脑记住它的全部位数，大脑会坍缩成黑洞。',
+  'TREE(3) 比葛立恒数还要大得多，而 TREE(2) 只有 3。',
+  '斐波那契数列相邻两项之比趋近于黄金比例 φ ≈ 1.618。',
+  '把 1/7 写成小数：0.142857142857…，乘以 2 到 6，循环节只是转了个圈。',
+  '“数学是上帝用来书写宇宙的语言。”——伽利略',
+  '“我们必须知道，我们必将知道。”——希尔伯特的墓志铭',
+  '巴塞尔问题：1 + 1/4 + 1/9 + 1/16 + … = π²/6。欧拉 28 岁时解决了它。',
+  '调和级数 1 + 1/2 + 1/3 + … 发散，但它慢得惊人：加到第 10⁴³ 项才超过 100。',
+  '世界上最短的数学论文只有两句话，反驳了欧拉的一个猜想。',
+  '高斯据说十岁就算出了 1 加到 100 等于 5050。',
+  '0 的概念从印度传入阿拉伯，再传入欧洲。罗马数字里没有 0。',
+  '“质数是数学的原子。”',
+  '圆周率日是 3 月 14 日，恰好也是爱因斯坦的生日。',
+  '有人把 π 背到了小数点后 70,000 位。你现在背了多少位？',
+  '欧拉一生发表了约 850 篇论文，晚年失明后产量反而更高了。',
+  '阿基米德用 96 边形把 π 夹在 3.1408 和 3.1429 之间。',
+  '祖冲之算出 π 在 3.1415926 和 3.1415927 之间，领先世界近千年。',
+  '“无穷大”符号 ∞ 由沃利斯在 1655 年引入。',
+  '在实数里，0 到 1 之间的点与整条实数轴上的点一样多。',
+  '巴拿赫-塔斯基悖论：一个球可以切成五块，再拼成两个一样大的球。',
+  '黎曼猜想价值一百万美元，至今无人领取。',
+  'P 是否等于 NP？如果相等，你的银行密码可能会很危险。',
+  '康威的生命游戏只有四条规则，却能模拟一台完整的计算机。',
+  '曼德博集合的边界无限复杂，它的豪斯多夫维数是 2。',
+  '谢尔宾斯基三角形的维数是 log₂3 ≈ 1.585——比线多，比面少。',
+  '海岸线有多长？这取决于你的尺子有多短。',
+  '“数学家是把咖啡变成定理的机器。”——埃尔德什',
+  '埃尔德什一生合作过五百多位作者，于是有了“埃尔德什数”。',
+  '冯·诺依曼心算的速度，据说和当时的电子计算机差不多。',
+  '一副扑克牌洗好后的顺序，大概率在宇宙历史上从未出现过：52! ≈ 8 × 10⁶⁷。',
+  '国际象棋可能的对局数，大约是 10¹²⁰，称为香农数。',
+  '可观测宇宙中大约有 10⁸⁰ 个原子。你早就数过这个数了。',
+  '斯奎斯数曾被称为“数学证明中出现过的最大的数”，大约是 10^10^10^34。',
+  'Bowers 给大数起了很多名字：giggol、gaggol、tritri、tridecal……',
+  '“如果人们不相信数学是简单的，那只是因为他们没有意识到生活有多复杂。”——冯·诺依曼',
+  '自然数的个数是 ℵ₀，实数的个数是 2^ℵ₀。中间有没有别的无穷？这个问题无法在 ZFC 中判定。',
+  '选择公理推出良序定理，也推出巴拿赫-塔斯基悖论。数学家对它又爱又恨。',
+  '高德纳发明了箭头记号：3↑↑3 = 3^27，3↑↑↑3 已经是一座 76 亿层的塔。',
+  '阿克曼函数是最早被发现的“可计算但不是原始递归”的函数之一。',
+  '忙碌海狸函数 Σ(n) 增长得比任何可计算函数都快。Σ(5) 直到 2024 年才被确定。',
+  '“上帝创造了整数，其余都是人的工作。”——克罗内克',
+  '你已经读了很多快讯了。要不要去买点东西？',
+  '在这座塔里，1 + 1 依然等于 2。只是之后的事情会稍微失控一点。',
+];
+let newsIdx = Math.floor(Math.random() * NEWS.length), newsTimer = 0;
+function rotateNews(force) {
+  const el = $('#newsT');
+  if (!S.opt.news) { show($('#news'), false); return; }
+  show($('#news'), true);
+  newsIdx = (newsIdx + 1 + Math.floor(Math.random() * 3)) % NEWS.length;
+  el.style.opacity = 0;
+  setTimeout(() => { el.textContent = NEWS[newsIdx]; el.style.opacity = 1; }, force ? 0 : 400);
+  S.stat.newsRead++;
+}
+
+/* ============================================================
+   章节页面
+   ============================================================ */
+const UI = { tab: 'count', notify: {}, offline: false, pendingStory: [], pendingEnd: false, upd: null, seenTabs: {} };
+
+function btn(label, onclick, cls = '') { return h('button', { class: 'btn ' + cls, onclick }, label); }
+function costBtn(label, onclick, cls = '') {
+  const b = h('button', { class: 'btn ' + cls, onclick }, h('span', null, label), h('small', null, ''));
+  b._lbl = b.children[0]; b._c = b.children[1];
+  return b;
+}
+function updBtn(b, can, costText, label) {
+  setCls(b, 'can', can); setCls(b, 'no', !can);
+  if (costText != null) setText(b._c, costText);
+  if (label != null) setText(b._lbl, label);
+}
+function cell(def) {
+  const el = h('button', { class: 'cell', onclick: () => def.buy() }, h('b', null, def.n), h('span', null, def.d), h('span', { class: 'c' }, ''));
+  const c = el.querySelector('.c');
+  return { el, upd() {
+    const st = def.state();
+    setCls(el, 'done', st === 'done'); setCls(el, 'can', st === 'can'); setCls(el, 'lock', st === 'lock');
+    setText(c, st === 'done' ? (def.doneText ? def.doneText() : '已证明') : def.cost());
+  } };
+}
+function head(sec, title, intro) {
+  return h('div', { class: 'chap-head' }, h('h2', null, h('span', { class: 's' }, sec), title), intro ? h('p', null, intro) : null);
+}
+function toggle(label, get, set) {
+  const i = h('input', { type: 'checkbox' });
+  i.checked = get(); i.onchange = () => set(i.checked);
+  const l = h('label', { class: 'tg' }, i, label);
+  l._sync = () => { if (i.checked !== get()) i.checked = get(); };
+  return l;
+}
+function kv(pairs) {
+  const dl = h('dl', { class: 'kv' }); const refs = [];
+  for (const [k] of pairs) { const dd = h('dd'); dl.append(h('dt', null, k), dd); refs.push(dd); }
+  dl._upd = () => pairs.forEach(([, f], i) => setText(refs[i], f()));
+  return dl;
+}
+
+/* ---------- §1 计数 ---------- */
+function viewCount(v) {
+  v.append(head('§1', '计数', '每种计数器都在生产前一种，手指则直接生产数。每种计数器每买满 10 个，产量翻倍。'));
+  const click = btn('数一数 +1', () => clickN(), 'big');
+  const maxAll = btn('全部最大（M）', () => buyMaxAll(), 'big red');
+  const autoRow = h('div', { class: 'row' });
+  const tgs = [
+    toggle('自动购买计数器', () => S.au.gen, x => S.au.gen = x),
+    toggle('自动运算速度', () => S.au.spd, x => S.au.spd = x),
+    toggle('自动数位扩展', () => S.au.boost, x => S.au.boost = x),
+    toggle('自动进制跃迁', () => S.au.base, x => S.au.base = x),
+  ];
+  autoRow.append(...tgs);
+  v.append(h('div', { class: 'row' }, click, maxAll), h('div', { class: 'row', style: 'margin:10px 0 14px' }, autoRow));
+  const tbl = h('div', { class: 'gens' });
+  const rows = GENS.map((g, k) => {
+    const amt = h('div', { class: 'amt' }), mul = h('div', { class: 'mul' });
+    const b1 = costBtn('买 1', () => buyGen(k, 'one'), 'sm'), b10 = costBtn('买到 10', () => buyGen(k, 'ten'), 'sm');
+    const row = h('div', { class: 'gen' }, h('div', { class: 'seal' }, g.g), h('div', { class: 'nm' }, g.n, h('small', null, g.f)), amt, mul, h('div', { class: 'bt' }, b1, b10));
+    tbl.append(row);
+    return { row, amt, mul, b1, b10 };
+  });
+  v.append(tbl);
+  const spd = h('div', { class: 'panel' }), boost = h('div', { class: 'panel' }), base = h('div', { class: 'panel' });
+  const spdTxt = h('p', { class: 'num' }), spdB1 = costBtn('升 1 级', () => buySpd(false)), spdBM = btn('最大', () => buySpd(true));
+  spd.append(h('h4', null, '运算速度'), spdTxt, h('div', { class: 'row' }, spdB1, spdBM));
+  const bTxt = h('p'), bB = costBtn('数位扩展（D）', () => confirmLite(doBoost), 'red');
+  boost.append(h('h4', null, '数位扩展'), bTxt, bB);
+  const gTxt = h('p'), gB = costBtn('进制跃迁（G）', () => confirmLite(doBase), 'red');
+  base.append(h('h4', null, '进制跃迁'), gTxt, gB);
+  v.append(h('h3', null, '加速'), h('div', { class: 'panels' }, spd, boost, base));
+  const infBox = h('div', { class: 'panel', style: 'margin-top:14px' });
+  const infTxt = h('p'), infBar = h('div', { class: 'bar' }, h('i')), infBtn = costBtn('抵达无穷（I）', () => doCrunch(), 'big red');
+  infBox.append(h('h4', null, '通往无穷'), infTxt, infBar, h('div', { style: 'margin-top:10px' }, infBtn));
+  v.append(infBox);
+  return () => {
+    show(click, S.inf.cnt === 0 && S.tr.cnt === 0 && S.st.cnt === 0);
+    show(autoRow, hasI('i5') || trMile(1));
+    show(tgs[2], hasI('i6') || trMile(1)); show(tgs[3], hasI('i6') || trMile(1));
+    tgs.forEach(t => t._sync());
+    const open = tiersOpen();
+    rows.forEach((r, k) => {
+      show(r.row, k <= open && k < 8);
+      setCls(r.row, 'next', k >= open);
+      if (k >= open) { setText(r.amt, '需要更多数位扩展'); setText(r.mul, ''); updBtn(r.b1, false, '—'); updBtn(r.b10, false, '—'); return; }
+      const g = S.gens[k];
+      setHTML(r.amt, fmt(g.a, 1) + '<small>已购 ' + fmtN(g.b) + '</small>');
+      setText(r.mul, '×' + fmt(pow10(C.genLog[k] || 0)));
+      const p = genUnitCost(k), rem = 10 - g.b % 10;
+      updBtn(r.b1, S.n.gte(p), fmt(p)); updBtn(r.b10, S.n.gte(p.mul(rem)), fmt(p.mul(rem)) + '（' + rem + ' 个）');
+    });
+    setText(spdTxt, inC(1) ? '费马大定理：本轮无法购买' : 'Lv. ' + fmtN(S.spd) + '　每级 ×' + C.ps.toFixed(3) + '　全体 ×' + fmt(C.spdMult));
+    const sc = SPD_COST.cost(S.spd); updBtn(spdB1, !inC(1) && S.n.gte(sc), fmt(sc)); setCls(spdBM, 'can', !inC(1) && S.n.gte(sc));
+    const br = boostReq();
+    setText(bTxt, '已扩展 ' + fmtN(S.boost) + ' 次，所有计数器 ×' + C.bp.toFixed(1) + '/次。' + (S.boost < 4 ? '下一次解锁新的计数器。' : '') + (inC(4) && S.boost >= 5 ? '（庞加莱猜想：已达上限）' : ''));
+    updBtn(bB, canBoost(), '需要 ' + fmtN(br.amt) + ' 个' + GENS[br.tier].n + (S.inf.brk && !S.inf.chal ? '' : '，重置计数器'));
+    show(base, S.boost >= 4 || S.base > 0 || S.inf.cnt > 0);
+    setText(gTxt, '当前是 ' + (2 + S.base) + ' 进制，运算速度每级倍率 +' + (0.01 * C.baseEff).toFixed(3) + '/次。' + (inC(3) ? '（四色定理：本轮禁用）' : ''));
+    updBtn(gB, !inC(3) && S.gens[7].b >= baseReq(), '需要 ' + fmtN(baseReq()) + ' 个量子计算机' + (S.inf.brk && !S.inf.chal ? '' : '，重置扩展'));
+    const goal = S.inf.chal ? chalGoal(S.inf.chal) : INF;
+    const prog = Math.min(1, lgn(S.n) / lgn(goal));
+    infBar.firstChild.style.width = (prog * 100).toFixed(2) + '%';
+    if (S.inf.chal) setText(infTxt, '正在证明「' + CHALS[S.inf.chal - 1].n + '」：数达到 ' + fmt(goal) + ' 即完成。进度 ' + (prog * 100).toFixed(1) + '%');
+    else if (S.inf.brk) setText(infTxt, '无穷已被打破。超过 1.8×10³⁰⁸ 后，数得越远，∞ 点越多。');
+    else setText(infTxt, '数到 1.8×10³⁰⁸ 就能抵达无穷。进度 ' + (prog * 100).toFixed(1) + '%');
+    show(infBox, S.maxN.gte(1e100) || S.inf.cnt > 0 || S.tr.cnt > 0);
+    updBtn(infBtn, canCrunch(), canCrunch() ? '+' + fmt(ipGain()) + ' ∞ 点' : '尚未抵达');
+  };
+}
+function confirmLite(f) { f(); }
+
+/* ---------- §2 定理 ---------- */
+function viewTheo(v) {
+  v.append(head('§2', '定理', '证明一个定理需要花费数，证明后永久生效到下一次无穷。'));
+  const g = h('div', { class: 'theorems' });
+  const items = THEOREMS.map(t => {
+    const b = costBtn('证明', () => buyTh(t.id), 'sm');
+    const box = h('div', { class: 'thm' },
+      h('div', { class: 'ti' }, h('span', { class: 'k' }, '定理 ' + t.id), t.n, ' ', h('span', { class: 'qed' }, '∎')),
+      h('div', { class: 'fm' }, t.m), h('div', { class: 'ef' }, t.d), h('div', { class: 'ft' }, h('span', { class: 'muted num' }, '10' + supTxt(t.c) + ' 个数'), b));
+    g.append(box); return { t, b, box };
+  });
+  v.append(g);
+  const autoT = toggle('自动证明定理', () => S.au.th, x => S.au.th = x);
+  v.append(h('div', { class: 'row', style: 'margin-top:14px' }, autoT));
+  return () => {
+    show(autoT, hasI('i3')); autoT._sync();
+    items.forEach(({ t, b, box }) => {
+      const done = !!S.th[t.id];
+      setCls(box, 'done', done); show(b, !done);
+      updBtn(b, S.n.gte(pow10(t.c)), '');
+    });
+  };
+}
+const SUPS = { 0: '⁰', 1: '¹', 2: '²', 3: '³', 4: '⁴', 5: '⁵', 6: '⁶', 7: '⁷', 8: '⁸', 9: '⁹' };
+function supTxt(n) { return String(n).split('').map(c => SUPS[c] ?? c).join(''); }
+
+/* ---------- §3 质数 ---------- */
+function viewPrime(v) {
+  v.append(head('§3', '质数', '筛子从 2 开始逐个检验整数。找到的质数越多，数的产量越高；每越过一个梅森质数 2ᵖ − 1，手指产量翻倍、筛速翻倍。'));
+  const info = kv([
+    ['已检验到', () => fmt(S.sv.x.floor(), 0)],
+    ['已发现质数', () => (S.sv.x.lt(PRIME_TBL.N) ? '' : '约 ') + fmt(C.pi, 0) + ' 个'],
+    ['筛子速度', () => fmt(C.sieveSpd) + ' 个/秒'],
+    ['效果', () => '数的产量 ×' + fmt(pow10(C.primeLog)) + '（指数 ' + C.pe.toFixed(3) + '）'],
+    ['梅森质数', () => C.mers + ' / 52'],
+  ]);
+  const sb1 = costBtn('升级筛子', () => buySieve(false)), sbm = btn('最大', () => buySieve(true));
+  const autoS = toggle('自动升级筛子', () => S.au.sieve, x => S.au.sieve = x);
+  const lvl = h('div', { class: 'muted' });
+  const p1 = h('div', { class: 'panel' }, h('h4', null, '埃拉托色尼之筛'), info, lvl, h('div', { class: 'row', style: 'margin-top:10px' }, sb1, sbm, autoS));
+  const grid = h('div', { class: 'pgrid' }); const cells = [];
+  for (let i = 0; i < 100; i++) { const c = h('span'); grid.append(c); cells.push(c); }
+  const gridNote = h('p', { class: 'muted' });
+  const mers = h('div', { class: 'mers' }); const mchips = MERSENNE.map(p => { const c = h('span', null, 'M' + p); mers.append(c); return c; });
+  v.append(p1, h('h3', null, '最近检验的 100 个数'), grid, gridNote, h('h3', null, '梅森质数', h('span', { class: 'sub' }, '人类目前只知道这 52 个')), mers);
+  let lastX = -1, gt = 0;
+  return () => {
+    const warn = inC(2) ? '（哥德巴赫猜想：本轮质数筛失效）' : '';
+    info._upd(); setText(lvl, '筛子等级 ' + fmtN(S.sv.lv) + warn);
+    const c = SIEVE_COST.cost(S.sv.lv); updBtn(sb1, S.n.gte(c), fmt(c)); setCls(sbm, 'can', S.n.gte(c));
+    show(autoS, hasI('i8')); autoS._sync();
+    mchips.forEach((ch, i) => setCls(ch, 'f', i < C.mers));
+    if (++gt % 4) return;
+    if (S.sv.x.lt(1e15)) {
+      const x = Math.floor(S.sv.x.toNumber());
+      if (x !== lastX) {
+        lastX = x; const start = Math.max(1, x - 99);
+        for (let i = 0; i < 100; i++) { const n = start + i; const el = cells[i]; setText(el, n <= x ? String(n) : ''); setCls(el, 'p', n <= x && isPrime(n)); }
+      }
+      setText(gridNote, '红色的是质数。');
+    } else {
+      if (lastX !== -2) { lastX = -2; cells.forEach(el => { setText(el, '?'); setCls(el, 'p', false); }); }
+      setText(gridNote, '数已经大到无法逐个展示。根据素数定理，x 附近大约每 ' + fmt(S.sv.x.ln()) + ' 个数里有一个质数。');
+    }
+  };
+}
+
+/* ---------- §4 无穷 ---------- */
+function viewInf(v) {
+  v.append(head('§4', '无穷', '每次抵达无穷，数与计数器都会重置，但你会获得 ∞ 点。用它们换取永久的升级。'));
+  const stats = kv([
+    ['∞ 点', () => fmt(S.inf.ip)],
+    ['无穷次数', () => fmtN(S.inf.cnt)],
+    ['最快无穷', () => S.inf.fast < 1e299 ? fmtTime(S.inf.fast) : '—'],
+    ['本轮用时', () => fmtTime(S.time.inf)],
+  ]);
+  const crunch = costBtn('抵达无穷（I）', () => doCrunch(), 'big red');
+  v.append(h('div', { class: 'panels' }, h('div', { class: 'panel' }, stats), h('div', { class: 'panel' }, h('h4', null, '本轮'), h('p', { class: 'muted' }, '达到 1.8×10³⁰⁸ 即可抵达无穷。'), crunch)));
+  // 自动无穷
+  const autoBox = h('div', { class: 'panel', style: 'margin-top:14px' });
+  const atg = toggle('自动无穷', () => S.au.cr, x => S.au.cr = x);
+  const mode = h('select', null, h('option', { value: 0 }, '获得 ∞ 点 ≥ X'), h('option', { value: 1 }, '本轮秒数 ≥ X'), h('option', { value: 2 }, '获得 ≥ 现有 ∞ 点 × X'));
+  mode.onchange = () => S.au.crMode = +mode.value;
+  const val = h('input', { type: 'text', size: 10 }); val.onchange = () => S.au.crVal = val.value.trim() || '1';
+  autoBox.append(h('h4', null, '自动无穷'), h('div', { class: 'row' }, atg, mode, val), h('p', { class: 'muted' }, '打破无穷之前，自动无穷总会在抵达时立刻执行。'));
+  v.append(autoBox);
+  v.append(h('h3', null, '无穷升级', h('span', { class: 'sub' }, '按顺序购买：每个升级需要先买它前面的那个')));
+  const mx = h('div', { class: 'matrix' });
+  const iu = INFU.map((u, i) => cell({ n: u.n, d: u.d, cost: () => fmt(u.c) + ' ∞ 点', buy: () => buyIU(u.id),
+    state: () => S.inf.upg[u.id] ? 'done' : (i > 0 && !S.inf.upg[INFU[i - 1].id]) ? 'lock' : S.inf.ip.gte(u.c) ? 'can' : 'no' }));
+  iu.forEach(c => mx.append(c.el)); v.append(mx);
+  const rep = h('div', { class: 'panel', style: 'margin-top:14px' }), repTxt = h('p', { class: 'num' }), repB = costBtn('倍增', () => buyRep(false)), repM = btn('最大', () => buyRep(true));
+  rep.append(h('h4', null, '∞ 点倍增'), repTxt, h('div', { class: 'row' }, repB, repM));
+  v.append(rep);
+  const brkH = h('h3', null, '超限升级', h('span', { class: 'sub' }, '打破无穷后可用')), bmx = h('div', { class: 'matrix', style: 'grid-template-columns:repeat(3,minmax(0,200px))' });
+  const bu = BRKU.map((u, i) => cell({ n: u.n, d: u.d, cost: () => fmt(pow10(u.c)) + ' ∞ 点', buy: () => buyBU(u.id),
+    state: () => S.inf.upg[u.id] ? 'done' : (i > 0 && !S.inf.upg[BRKU[i - 1].id]) ? 'lock' : S.inf.ip.gte(pow10(u.c)) ? 'can' : 'no' }));
+  bu.forEach(c => bmx.append(c.el)); v.append(brkH, bmx);
+  // ∞ 发生器
+  const igH = h('h3', null, '∞ 发生器', h('span', { class: 'sub' }, '它们持续积累 ∞ 能量；∞ 能量永不重置')), igBox = h('div', { class: 'panel' });
+  const ieTxt = h('p', { class: 'num' });
+  const igRows = IGENS.map((g, j) => {
+    const lv = h('span', { class: 'num' }), b = costBtn('买 1', () => buyIG(j, false), 'sm'), m = btn('最大', () => buyIG(j, true), 'sm');
+    const r = h('div', { class: 'gen', style: 'grid-template-columns:44px 1fr 1fr auto' }, h('div', { class: 'seal it' }, g.g), h('div', { class: 'nm' }, g.n, h('small', null, '每级 +' + ((j + 1) ** 2) + ' 份能量增速')), lv, h('div', { class: 'bt' }, b, m));
+    igBox.append(r); return { lv, b, m };
+  });
+  const autoIg = toggle('自动购买 ∞ 发生器与倍增', () => S.au.igen, x => { S.au.igen = x; S.au.rep = x; });
+  igBox.append(ieTxt, autoIg);
+  v.append(igH, igBox);
+  return () => {
+    stats._upd();
+    updBtn(crunch, canCrunch(), canCrunch() ? '+' + fmt(ipGain()) + ' ∞ 点' : '尚未抵达');
+    show(autoBox, hasI('i12') || trMile(1)); atg._sync();
+    if (document.activeElement !== mode) mode.value = S.au.crMode;
+    if (document.activeElement !== val) val.value = S.au.crVal;
+    iu.forEach(c => c.upd());
+    const rc = REP_COST.cost(S.inf.rep);
+    setText(repTxt, '已倍增 ' + fmtN(S.inf.rep) + ' 次，∞ 点获取共 ×' + fmt(pow10(C.ipMultLog)));
+    updBtn(repB, S.inf.ip.gte(rc), fmt(rc) + ' ∞ 点'); setCls(repM, 'can', S.inf.ip.gte(rc));
+    show(brkH, S.inf.brk); show(bmx, S.inf.brk); if (S.inf.brk) bu.forEach(c => c.upd());
+    const ig = unl.igen(); show(igH, ig); show(igBox, ig);
+    if (ig) {
+      setText(ieTxt, '∞ 能量 ' + fmt(S.inf.ie) + '（+' + fmt(C.ieRate) + '/秒）→ 计数器内在倍率的指数 ×' + C.Eie.toFixed(3));
+      igRows.forEach((r, j) => { const c = igenCost(j).cost(S.inf.g[j].b); setText(r.lv, '等级 ' + fmtN(S.inf.g[j].b)); updBtn(r.b, S.inf.ip.gte(c), fmt(c)); setCls(r.m, 'can', S.inf.ip.gte(c)); });
+      show(autoIg, trMile(5)); autoIg._sync();
+    }
+  };
+}
+
+/* ---------- §5 猜想 ---------- */
+function viewChal(v) {
+  v.append(head('§5', '猜想', '在限制条件下让数达到目标，就算证明了这个猜想。证明全部八个，就能打破无穷。进入证明会重置本轮。'));
+  const st = h('p', { class: 'muted' });
+  v.append(st);
+  const list = h('div', { class: 'probs' });
+  const items = CHALS.map(c => {
+    const b = btn('开始证明', () => { if (S.inf.chal === c.id) exitChal(); else confirmDo('开始证明「' + c.n + '」', '本轮进度会重置。限制：' + c.d + '。', () => startChal(c.id)); }, 'sm');
+    const s = h('div', { class: 'st' });
+    const el = h('div', { class: 'prob' }, h('div', { class: 'k' }, String(c.id)), h('div', null, h('div', { class: 'ti' }, c.n), h('div', { class: 'st' }, '限制：' + c.d), h('div', { class: 'st' }, '目标：数达到 10' + supTxt(c.g) + '　奖励：' + c.r), s), b);
+    list.append(el); return { c, b, el, s };
+  });
+  v.append(list);
+  return () => {
+    const n = Object.keys(S.inf.done).length;
+    setText(st, S.inf.brk ? '八个猜想全部证明，无穷已被打破。' : '已证明 ' + n + ' / 8。');
+    items.forEach(({ c, b, el, s }) => {
+      const cur = S.inf.chal === c.id;
+      setCls(el, 'done', !!S.inf.done[c.id]); setCls(el, 'cur', cur);
+      setText(b, cur ? '放弃证明' : S.inf.done[c.id] ? '再证一次' : '开始证明');
+      setText(s, cur ? '进行中：' + fmt(S.n) + ' / ' + fmt(chalGoal(c.id)) : '');
+    });
+  };
+}
+
+/* ---------- §6 超越 ---------- */
+function viewTrans(v) {
+  v.append(head('§6', '超越', '打破无穷后，数到 10¹⁰⁰⁰⁰（一个一万位的数）就能超越。超越会重置无穷之下的一切，换来超越点。'));
+  const stats = kv([
+    ['超越点', () => fmt(S.tr.tp)],
+    ['超越次数', () => fmtN(S.tr.cnt)],
+    ['本轮用时', () => fmtTime(S.time.tr)],
+    ['超越能量', () => fmt(S.tr.te) + '（+' + fmt(C.teRate) + '/秒）→ 内在倍率的指数 ×' + C.Ete.toFixed(3)],
+  ]);
+  const tb = costBtn('超越（T）', () => confirmDo('超越', '∞ 点、无穷升级（视里程碑而定）与本轮进度都会重置。', doTrans), 'big red');
+  v.append(h('div', { class: 'panels' }, h('div', { class: 'panel' }, stats), h('div', { class: 'panel' }, h('h4', null, '超越'), h('p', { class: 'muted' }, '超越能量随背下的常数位数增长，且永不重置。'), tb)));
+  const auto = h('div', { class: 'panel', style: 'margin-top:14px' }), atg = toggle('自动超越', () => S.au.tr, x => S.au.tr = x);
+  const mode = h('select', null, h('option', { value: 0 }, '获得超越点 ≥ X'), h('option', { value: 1 }, '本轮秒数 ≥ X')); mode.onchange = () => S.au.trMode = +mode.value;
+  const val = h('input', { type: 'text', size: 10 }); val.onchange = () => S.au.trVal = val.value.trim() || '1';
+  auto.append(h('h4', null, '自动超越'), h('div', { class: 'row' }, atg, mode, val)); v.append(auto);
+  v.append(h('h3', null, '里程碑', h('span', { class: 'sub' }, '按超越次数解锁，力迫也不会清除')));
+  const ml = h('div', { class: 'flist' }); const mi = TR_MILES.map(([n, d]) => { const r = h('div', null, h('span', { class: 'm' }), h('span', null, n + ' 次超越'), h('span', null, d)); ml.append(r); return { r, n }; });
+  v.append(ml);
+  v.append(h('h3', null, '常数', h('span', { class: 'sub' }, '每背下一位，效果就更强一点')));
+  const cg = h('div', { class: 'panels' });
+  const cs = CONSTS.map(c => {
+    const dg = h('div', { class: 'digits' }), ef = h('p', { class: 'muted' }), b = costBtn('背 1 位', () => buyConst(c.id, false), 'sm'), m = btn('最大', () => buyConst(c.id, true), 'sm');
+    cg.append(h('div', { class: 'panel const' }, h('h4', null, h('span', { class: 'it' }, c.s), '　', c.n), dg, ef, h('div', { class: 'row' }, b, m)));
+    return { c, dg, ef, b, m, last: -1 };
+  });
+  const autoC = toggle('自动背诵常数', () => S.au.cst, x => S.au.cst = x);
+  v.append(cg, h('div', { class: 'row', style: 'margin-top:10px' }, autoC));
+  v.append(h('h3', null, '超越定理'));
+  const tmx = h('div', { class: 'matrix', style: 'grid-template-columns:repeat(5,minmax(0,150px))' });
+  const tu = TRU.map(u => cell({ n: u.n, d: u.d, cost: () => fmt(pow10(u.c)) + ' 超越点', buy: () => buyTU(u.id), state: () => S.tr.upg[u.id] ? 'done' : S.tr.tp.gte(pow10(u.c)) ? 'can' : 'no' }));
+  tu.forEach(c => tmx.append(c.el)); v.append(tmx);
+  const fH = h('h3', null, '分形', h('span', { class: 'sub' }, '谢尔宾斯基三角形，维数 log₂3 ≈ 1.585'));
+  const cv = h('canvas', { id: 'frac', width: 600, height: 520 }), fTxt = h('p', { class: 'muted' }), fb = costBtn('迭代一次', () => buyFrac(false)), fm = btn('最大', () => buyFrac(true));
+  const fBox = h('div', { class: 'panel', style: 'display:grid;grid-template-columns:minmax(0,340px) 1fr;gap:16px;align-items:center' }, cv, h('div', null, fTxt, h('div', { class: 'row' }, fb, fm)));
+  v.append(fH, fBox);
+  let lastFr = -1, lastTheme = '';
+  return () => {
+    stats._upd();
+    updBtn(tb, canTrans(), canTrans() ? '+' + fmt(tpGain()) + ' 超越点' : '需要数达到 10¹⁰⁰⁰⁰' + (S.inf.brk ? '' : '并打破无穷'));
+    show(auto, trMile(12)); atg._sync();
+    if (document.activeElement !== mode) mode.value = S.au.trMode;
+    if (document.activeElement !== val) val.value = S.au.trVal;
+    mi.forEach(({ r, n }) => { const ok = S.tr.cnt >= n; setCls(r, 'got', ok); setText(r.firstChild, ok ? '✓' : ''); });
+    cs.forEach(o => {
+      const d = digitsFor(o.c.id);
+      if (d !== o.last) {
+        o.last = d;
+        const str = DIGITS[o.c.id], dot = str.indexOf('.');
+        const shown = str.slice(0, Math.min(dot + 1 + d, str.length)), nxt = str.slice(dot + 1 + d, dot + 1 + d + 8);
+        setHTML(o.dg, '<span class="sym">' + o.c.s + ' =</span>' + shown + (d === 0 ? '' : '') + '<span class="nx">' + nxt + (d + 8 < str.length - dot ? '…' : '') + '</span>' + (d > str.length - dot - 1 ? '<span class="nx">（已超过 600 位，后面的位数这里写不下了）</span>' : ''));
+        o.dg.scrollTop = o.dg.scrollHeight;
+      }
+      setText(o.ef, '已背 ' + fmtN(d) + ' 位。' + o.c.d);
+      const cc = constCost(o.c).cost(d); updBtn(o.b, S.tr.tp.gte(cc), fmt(cc)); setCls(o.m, 'can', S.tr.tp.gte(cc));
+    });
+    show(autoC, trMile(40)); autoC._sync();
+    tu.forEach(c => c.upd());
+    const fu = unl.frac(); show(fH, fu); show(fBox, fu);
+    if (fu) {
+      setText(fTxt, '已迭代 ' + fmtN(S.tr.fr) + ' 次。每次迭代：超越点获取 ×1.585，超越能量增速 +10%。');
+      const fc = FRAC_COST.cost(S.tr.fr); updBtn(fb, S.tr.tp.gte(fc), fmt(fc) + ' 超越点'); setCls(fm, 'can', S.tr.tp.gte(fc));
+      const th = getComputedStyle(document.documentElement).getPropertyValue('--ink');
+      if (S.tr.fr !== lastFr || th !== lastTheme) { lastFr = S.tr.fr; lastTheme = th; drawSierpinski(cv, Math.min(S.tr.fr, 7), th); }
+    }
+  };
+}
+function drawSierpinski(cv, depth, color) {
+  const g = cv.getContext('2d'), W = cv.width, H = cv.height;
+  g.clearRect(0, 0, W, H); g.fillStyle = color.trim() || '#16263f';
+  const tri = (x, y, s, d) => {
+    if (d <= 0) { g.beginPath(); g.moveTo(x, y); g.lineTo(x + s, y); g.lineTo(x + s / 2, y - s * 0.866); g.closePath(); g.fill(); return; }
+    tri(x, y, s / 2, d - 1); tri(x + s / 2, y, s / 2, d - 1); tri(x + s / 4, y - s * 0.433, s / 2, d - 1);
+  };
+  tri(10, H - 6, W - 20, depth);
+}
+
+/* ---------- §7 集合 ---------- */
+function viewSet(v) {
+  v.append(head('§7', '集合', '数到 10^(10⁶)（一个有一百万位的数）就能力迫。力迫会重置超越之下的一切，换来基数 κ。集合的大小永不重置，数的指数会乘上 2 的集合大小次方。'));
+  const stats = kv([
+    ['基数 κ', () => fmt(S.st.k)],
+    ['力迫次数', () => fmtN(S.st.cnt)],
+    ['集合大小 |S|', () => S.st.s.toFixed(2) + '（+' + C.sRate.toFixed(4) + '/秒）'],
+    ['幂集效果', () => '内在倍率的指数 ×2^|S| = ' + fmt(C.Eset)],
+  ]);
+  const fb = costBtn('力迫（F）', () => confirmDo('力迫', '超越点、常数位数与超越定理（视公理而定）都会重置。集合大小与 ℵ 保留。', doForce), 'big red');
+  v.append(h('div', { class: 'panels' }, h('div', { class: 'panel' }, stats), h('div', { class: 'panel' }, h('h4', null, '力迫'), fb)));
+  const auto = h('div', { class: 'panel', style: 'margin-top:14px' }), atg = toggle('自动力迫', () => S.au.fo, x => S.au.fo = x);
+  const val = h('input', { type: 'text', size: 6 }); val.onchange = () => S.au.foVal = val.value.trim() || '2';
+  auto.append(h('h4', null, '自动力迫'), h('div', { class: 'row' }, atg, h('span', { class: 'muted' }, '当获得 ≥ 现有 κ ×'), val)); v.append(auto);
+  const al = h('div', { class: 'panel', style: 'margin-top:14px' }), alT = h('p', { class: 'num' }), alB = costBtn('下一个 ℵ', () => buyAleph(false)), alM = btn('最大', () => buyAleph(true));
+  al.append(h('h4', null, 'ℵ 阶梯'), alT, h('div', { class: 'row' }, alB, alM));
+  v.append(al, h('h3', null, 'ZFC 公理'));
+  const amx = h('div', { class: 'matrix', style: 'grid-template-columns:repeat(3,minmax(0,200px))' });
+  const ax = AXIOMS.map(u => cell({ n: u.n, d: u.d, cost: () => fmt(pow10(u.c)) + ' κ', buy: () => buyAx(u.id), state: () => S.st.ax[u.id] ? 'done' : S.st.k.gte(pow10(u.c)) ? 'can' : 'no' }));
+  ax.forEach(c => amx.append(c.el)); v.append(amx);
+  return () => {
+    stats._upd();
+    updBtn(fb, canForce(), canForce() ? '+' + fmt(kGain()) + ' κ' : '需要数达到 10^(10⁶)');
+    show(auto, hasZ('z6')); atg._sync(); if (document.activeElement !== val) val.value = S.au.foVal;
+    const c = ALEPH_COST.cost(S.st.al);
+    setText(alT, S.st.al > 0 ? '已拥有 ℵ₀ 到 ℵ' + subTxt(S.st.al - 1) + '，共 ' + fmtN(S.st.al) + ' 个。每个 ℵ 让集合增长更快。' : '还没有任何 ℵ。买下 ℵ₀，集合就开始增长。');
+    updBtn(alB, S.st.k.gte(c), fmt(c) + ' κ'); setCls(alM, 'can', S.st.k.gte(c));
+    ax.forEach(c => c.upd());
+  };
+}
+const SUBS = '₀₁₂₃₄₅₆₇₈₉';
+function subTxt(n) { return n >= 1e6 ? fmtN(n) : String(n).split('').map(c => SUBS[+c] ?? c).join(''); }
+
+/* ---------- §8 超运算 ---------- */
+function viewHyper(v) {
+  v.append(head('§8', '超运算', '数 = 10↑↑s 表示 s 层高的指数塔。塔高随时间增加；当塔高达到某个值，对应的升级就会解锁。目标是 10↑↑10。'));
+  const big = h('div', { class: 'prog' }), rate = h('p', { class: 'num muted' }), bar = h('div', { class: 'bar' }, h('i')), tw = h('div', { class: 'tower' });
+  v.append(h('div', { class: 'panels' }, h('div', { class: 'panel' }, big, rate, bar), h('div', { class: 'panel' }, h('h4', null, '指数塔'), tw)));
+  v.append(h('h3', null, '大数的阶梯', h('span', { class: 'sub' }, '塔高达到要求时即可领取')));
+  const mx = h('div', { class: 'matrix', style: 'grid-template-columns:repeat(5,minmax(0,150px))' });
+  const us = HYU.map(u => cell({ n: u.n, d: u.d, cost: () => '塔高 ≥ ' + u.c, buy: () => buyHU(u.id), doneText: () => '已领取', state: () => S.hy.upg[u.id] ? 'done' : slogN() >= u.c ? 'can' : 'no' }));
+  us.forEach(c => mx.append(c.el)); v.append(mx);
+  const rp = h('div', { class: 'panel', style: 'margin-top:14px' }), rpT = h('p', { class: 'num' }), rpB = costBtn('再加一支箭', () => buyHRep());
+  const at = toggle('自动领取', () => S.au.hy && S.au.hrep, x => { S.au.hy = x; S.au.hrep = x; });
+  rp.append(h('h4', null, '再加一支箭', h('span', { class: 'muted' }, '　可以无限购买')), rpT, h('div', { class: 'row' }, rpB, at)); v.append(rp);
+  let lastF = -1;
+  return () => {
+    const s = slogN();
+    setHTML(big, '10<span class="arr">↑↑</span>' + s.toFixed(4));
+    setText(rate, '塔高每小时 +' + (hyRate() * 3600).toFixed(4) + '（额外塔高 ' + S.hy.h.toFixed(4) + '）');
+    bar.firstChild.style.width = Math.min(100, (s - 3.39) / (PENT_REQ - 3.39) * 100).toFixed(2) + '%';
+    const f = Math.floor(s * 4);
+    if (f !== lastF) { lastF = f; tw.innerHTML = ''; const n = Math.min(Math.floor(s), 12); for (let i = 0; i < n; i++) tw.append(h('span', null, '10')); if (s % 1 > 0.05 && n < 12) tw.append(h('span', { class: 'part' }, '10')); }
+    us.forEach(c => c.upd());
+    const nx = hrepNextAt(S.hy.rep);
+    setText(rpT, '已加 ' + fmtN(S.hy.rep) + ' 支，塔高增速 ×' + (1 + 0.15 * S.hy.rep).toFixed(2) + '。下一支需要塔高 ≥ ' + nx.toFixed(3));
+    updBtn(rpB, s >= nx, '塔高 ≥ ' + nx.toFixed(3)); at._sync();
+  };
+}
+
+/* ---------- §9 五级运算 ---------- */
+function viewPent(v) {
+  v.append(head('§9', '五级运算', '数 = 10↑↑↑p：一座以 10↑↑↑(p−1) 为层数的指数塔。把 p 推到 10，就是 tridecal。'));
+  const big = h('div', { class: 'prog' }), rate = h('p', { class: 'num muted' }), bar = h('div', { class: 'bar' }, h('i')), note = h('p', { class: 'muted' });
+  v.append(h('div', { class: 'panel' }, big, rate, bar, note));
+  v.append(h('h3', null, '比塔更高的数'));
+  const mx = h('div', { class: 'matrix', style: 'grid-template-columns:repeat(4,minmax(0,170px))' });
+  const us = PEU.map(u => cell({ n: u.n, d: u.d, cost: () => 'p ≥ ' + u.c, buy: () => buyPU(u.id), doneText: () => '已领取', state: () => S.pt.upg[u.id] ? 'done' : S.pt.p >= u.c ? 'can' : 'no' }));
+  us.forEach(c => mx.append(c.el)); v.append(mx);
+  const rp = h('div', { class: 'panel', style: 'margin-top:14px' }), rpT = h('p', { class: 'num' }), rpB = costBtn('迭代箭头', () => buyPRep());
+  rp.append(h('h4', null, '迭代箭头', h('span', { class: 'muted' }, '　可以无限购买')), rpT, rpB); v.append(rp);
+  return () => {
+    setHTML(big, '10<span class="arr">↑↑↑</span>' + S.pt.p.toFixed(5));
+    setText(rate, 'p 每小时 +' + (peRate() * 3600).toFixed(4));
+    bar.firstChild.style.width = Math.min(100, (S.pt.p - 2) / (END_P - 2) * 100).toFixed(2) + '%';
+    setText(note, S.pt.p >= END_P ? '你已经抵达 10↑↑↑10。之后的增长会越来越慢，但永远不会停下。' : '距离 tridecal 10↑↑↑10 还差 ' + (END_P - S.pt.p).toFixed(3) + '。');
+    us.forEach(c => c.upd());
+    const nx = prepNextAt(S.pt.rep);
+    setText(rpT, '已迭代 ' + fmtN(S.pt.rep) + ' 次，五级增速 ×' + (1 + 0.1 * S.pt.rep).toFixed(2) + '。下一次需要 p ≥ ' + nx.toFixed(3));
+    updBtn(rpB, S.pt.p >= nx, 'p ≥ ' + nx.toFixed(3));
+  };
+}
+
+/* ---------- 成就 ---------- */
+function viewAch(v) {
+  v.append(head('', '成就', '每个成就让所有计数器 ×1.03。'));
+  const cnt = h('p', { class: 'muted' }); v.append(cnt);
+  const g = h('div', { class: 'achs' });
+  const items = ACH.map(a => { const el = h('div', { class: 'ach', title: a.d }, h('b', null, a.n), h('span', null, a.d)); g.append(el); return { a, el }; });
+  v.append(g, h('h3', null, '著名的数', h('span', { class: 'sub' }, '你数过的那些数')));
+  const fl = h('div', { class: 'flist' });
+  const fi = FAMOUS.map(([x, n, d]) => { const r = h('div', null, h('span', { class: 'm' }), h('b', null, n), h('span', null, d)); fl.append(r); return { x, r }; });
+  const extra = [['10↑↑↑2 decker', () => S.pt.on], ['tritri 3↑↑↑3', () => S.pt.on && S.pt.p >= 2.32], ['10↑↑↑3', () => S.pt.on && S.pt.p >= 3], ['tridecal 10↑↑↑10', () => S.pt.on && S.pt.p >= 10]];
+  const ei = extra.map(([n, f]) => { const r = h('div', null, h('span', { class: 'm' }), h('b', null, n), h('span', null, '五级运算的领域')); fl.append(r); return { f, r }; });
+  v.append(fl);
+  return () => {
+    const n = Object.keys(S.ach).length;
+    setText(cnt, '已达成 ' + n + ' / ' + ACH.length + '，所有计数器 ×' + Math.pow(1.03, n).toFixed(2));
+    items.forEach(({ a, el }) => setCls(el, 'got', !!S.ach[a.id]));
+    fi.forEach(({ x, r }) => { const ok = S.maxN.gte(x); setCls(r, 'got', ok); setText(r.firstChild, ok ? '✓' : ''); });
+    ei.forEach(({ f, r }) => { const ok = f(); setCls(r, 'got', ok); setText(r.firstChild, ok ? '✓' : ''); });
+  };
+}
+
+/* ---------- 统计 ---------- */
+function viewStat(v) {
+  v.append(head('', '统计'));
+  const d = kv([
+    ['总游戏时间', () => fmtTime(S.time.all)],
+    ['其中离线', () => fmtTime(S.time.offline)],
+    ['到过的最大的数', () => (S.pt.on && S.pt.p > 2) ? '10↑↑↑' + S.pt.p.toFixed(4) : fmt(S.maxN)],
+    ['最高塔高', () => '10↑↑' + S.stat.maxSlog.toFixed(4)],
+    ['点击“数一数”', () => fmtN(S.clicks) + ' 次'],
+    ['无穷', () => fmtN(S.inf.cnt) + ' 次（本次超越内），最快 ' + (S.inf.fast < 1e299 ? fmtTime(S.inf.fast) : '—')],
+    ['累计 ∞ 点', () => fmt(S.inf.tot)],
+    ['超越', () => fmtN(S.tr.cnt) + ' 次，最快 ' + (S.tr.fast < 1e299 ? fmtTime(S.tr.fast) : '—')],
+    ['累计超越点', () => fmt(S.tr.tot)],
+    ['力迫', () => fmtN(S.st.cnt) + ' 次'],
+    ['累计基数', () => fmt(S.st.tot)],
+    ['计数器内在倍率的总指数', () => fmt(C.E)],
+    ['通关用时', () => S.end.done ? fmtTime(S.end.time) : '尚未抵达 10↑↑↑10'],
+    ['读过的快讯', () => fmtN(S.stat.newsRead) + ' 条'],
+  ]);
+  v.append(h('div', { class: 'panel' }, d));
+  return () => d._upd();
+}
+
+/* ---------- 设置 ---------- */
+function viewOpt(v) {
+  v.append(head('', '设置'));
+  const nota = h('select', null, ...[['sci', '科学计数 1.23e45'], ['eng', '工程计数 12.3e44'], ['cn', '中文单位 1.23载'], ['log', '对数 e45.09']].map(([a, b]) => h('option', { value: a }, b)));
+  nota.value = S.opt.nota; nota.onchange = () => S.opt.nota = nota.value;
+  const theme = h('select', null, h('option', { value: 'auto' }, '跟随系统'), h('option', { value: 'light' }, '方格纸'), h('option', { value: 'dark' }, '黑板'));
+  theme.value = S.opt.theme; theme.onchange = () => { S.opt.theme = theme.value; applyTheme(); };
+  const fps = h('select', null, ...[10, 20, 30].map(x => h('option', { value: x }, x + ' 帧/秒')));
+  fps.value = S.opt.fps; fps.onchange = () => S.opt.fps = +fps.value;
+  const tgs = [toggle('显示数学快讯', () => S.opt.news, x => { S.opt.news = x; rotateNews(true); }), toggle('离线进度', () => S.opt.offline, x => S.opt.offline = x), toggle('重置前确认', () => S.opt.conf, x => S.opt.conf = x)];
+  v.append(h('div', { class: 'panels' },
+    h('div', { class: 'panel' }, h('h4', null, '显示'), h('div', { class: 'row' }, h('span', null, '记数法'), nota), h('div', { class: 'row', style: 'margin-top:8px' }, h('span', null, '主题'), theme), h('div', { class: 'row', style: 'margin-top:8px' }, h('span', null, '刷新'), fps)),
+    h('div', { class: 'panel' }, h('h4', null, '游戏'), ...tgs.map(t => h('div', null, t)))));
+  const ta = h('textarea', { placeholder: '把存档文本粘贴到这里，然后点“导入”', 'aria-label': '存档文本' });
+  const msg = h('p', { class: 'muted' });
+  v.append(h('h3', null, '存档'), h('div', { class: 'panel' },
+    h('p', { class: 'muted' }, '游戏每 10 秒自动保存在这个浏览器里。换设备时，用导出的文本搬家。'), ta,
+    h('div', { class: 'row', style: 'margin-top:8px' },
+      btn('导出到文本框', () => { ta.value = exportSave(); ta.select(); setText(msg, '已导出。复制文本框里的内容即可保存。'); }),
+      btn('复制存档', async () => { const t = exportSave(); ta.value = t; try { await navigator.clipboard.writeText(t); setText(msg, '存档已复制到剪贴板。'); } catch (e) { ta.select(); setText(msg, '无法自动复制，请手动复制文本框内容。'); } }),
+      btn('导入', () => { try { importSave(ta.value); applyTheme(); rebuild(); save(); setText(msg, '导入成功。'); } catch (e) { setText(msg, '导入失败：这段文本不是有效的存档。'); } }),
+      btn('立即保存', () => { save(); setText(msg, '已保存。'); })), msg));
+  v.append(h('h3', null, '危险区'), h('div', { class: 'panel' }, h('p', { class: 'muted' }, '硬重置会删除全部进度，无法撤销。'),
+    btn('硬重置', () => modal({ title: '删除全部进度？', body: '<p>你将回到 10 个数的起点。这无法撤销。</p>', acts: [{ t: '取消' }, { t: '删除', red: true, f: () => { hardReset(); save(); applyTheme(); rebuild(); } }] }), 'red')));
+  v.append(h('h3', null, '关于'), h('div', { class: 'panel' }, h('p', null, '数之塔 v1.0.0。从 1 数到 10↑↑↑10。'),
+    h('p', { class: 'muted' }, '快捷键：M 全部最大，S 运算速度最大，D 数位扩展，G 进制跃迁，I 抵达无穷，T 超越，F 力迫。'),
+    h('p', { class: 'muted' }, '大数运算使用 break_eternity.js（MIT 许可）。常数的位数由 mpmath 计算。')));
+  return () => tgs.forEach(t => t._sync());
+}
+
+/* ---------- 导航 ---------- */
+const TABS = [
+  { id: 'count', s: '§1', n: '计数', v: viewCount, u: () => true },
+  { id: 'theo', s: '§2', n: '定理', v: viewTheo, u: () => S.maxN.gte(100) || unl.inf(), hint: '数到 100' },
+  { id: 'prime', s: '§3', n: '质数', v: viewPrime, u: () => unl.sieve(), hint: '证明埃拉托色尼筛法' },
+  { id: 'inf', s: '§4', n: '无穷', v: viewInf, u: () => unl.inf(), hint: '数到 1.8×10³⁰⁸' },
+  { id: 'chal', s: '§5', n: '猜想', v: viewChal, u: () => unl.chal(), hint: '抵达一次无穷' },
+  { id: 'trans', s: '§6', n: '超越', v: viewTrans, u: () => S.inf.brk || S.tr.cnt > 0 || S.st.cnt > 0, hint: '打破无穷' },
+  { id: 'set', s: '§7', n: '集合', v: viewSet, u: () => S.st.cnt > 0 || S.tr.cnt > 0, hint: '超越一次' },
+  { id: 'hyper', s: '§8', n: '超运算', v: viewHyper, u: () => S.hy.on, hint: '数到 10^(10¹⁰⁰)' },
+  { id: 'pent', s: '§9', n: '五级运算', v: viewPent, u: () => S.pt.on, hint: '数到 10↑↑10' },
+  { sep: true },
+  { id: 'ach', s: '', n: '成就', v: viewAch, u: () => true },
+  { id: 'stat', s: '', n: '统计', v: viewStat, u: () => true },
+  { id: 'opt', s: '', n: '设置', v: viewOpt, u: () => true },
+];
+const navBtns = {};
+function buildNav() {
+  const nav = $('#nav'); nav.innerHTML = '';
+  for (const t of TABS) {
+    if (t.sep) { nav.append(h('hr')); continue; }
+    const b = h('button', { onclick: () => { if (t.u()) go(t.id); } }, h('span', { class: 's' }, t.s), h('span', { class: 'n' }, t.n), h('span', { class: 'dot' }));
+    navBtns[t.id] = b; nav.append(b);
+  }
+}
+function updNav() {
+  let shownLocked = false;
+  for (const t of TABS) {
+    if (t.sep) continue;
+    const b = navBtns[t.id], ok = t.u();
+    if (ok && !UI.seenTabs[t.id] && t.id !== 'count') { UI.seenTabs[t.id] = 1; if (UI.started) UI.notify[t.id] = true; }
+    if (ok) { show(b, true); setCls(b, 'locked', false); setText(b.children[1], t.n); b.title = ''; }
+    else if (!shownLocked && t.s) { shownLocked = true; show(b, true); setCls(b, 'locked', true); setText(b.children[1], '？？？'); b.title = '解锁条件：' + t.hint; }
+    else show(b, false);
+    b.setAttribute('aria-current', UI.tab === t.id ? 'page' : 'false');
+    setCls(b, 'notify', !!UI.notify[t.id] && UI.tab !== t.id);
+  }
+}
+function go(id) {
+  UI.tab = id; UI.notify[id] = false;
+  const v = $('#view'); v.innerHTML = '';
+  const t = TABS.find(x => x.id === id);
+  UI.upd = t.v(v);
+  UI.upd();
+  window.scrollTo({ top: 0 });
+}
+function rebuild() { go(UI.tab); updNav(); }
+
+/* ---------- 侧栏 ---------- */
+let rateEMA = null, lastSlog = null;
+function updRail() {
+  setHTML($('#heroVal'), heroHTML(S.n));
+  let r = '';
+  if (S.pt.on && S.pt.p > 2) r = 'p 每小时 +' + (peRate() * 3600).toFixed(4);
+  else if (S.hy.on && slogN() >= 4) r = '塔高每小时 +' + (hyRate() * 3600).toFixed(4);
+  else if (C.P && C.P.gt(0)) r = '每秒 +' + fmt(C.P);
+  if (S.inf.chal) r += '　·　证明中：' + CHALS[S.inf.chal - 1].n;
+  setText($('#heroRate'), r);
+  // 下一个著名的数
+  const f = FAMOUS.find(([x]) => S.maxN.lt(x));
+  const el = $('#famous');
+  if (f) {
+    const a = S.maxN.max(1).slog(10).toNumber(), b = f[0].slog(10).toNumber();
+    const prev = FAMOUS[FAMOUS.indexOf(f) - 1];
+    const a0 = prev ? prev[0].slog(10).toNumber() : 0;
+    const pct = Math.max(0, Math.min(1, (a - a0) / (b - a0)));
+    setHTML(el, '下一个著名的数：<b>' + f[1] + '</b><div class="bar"><i style="width:' + (pct * 100).toFixed(1) + '%"></i></div>');
+  } else setHTML(el, S.pt.on ? '下一个目标：<b>' + (S.pt.p < 10 ? 'tridecal 10↑↑↑10' : '更远的地方') + '</b>' : '');
+  updNav();
+}
+
+/* ============================================================
+   主循环
+   ============================================================ */
+let lastReal = Date.now(), lastRender = 0, saveTimer = 0;
+function stepGame() {
+  if (UI.offline) return;
+  const now = Date.now();
+  let dt = (now - lastReal) / 1000; lastReal = now;
+  if (dt <= 0) return;
+  if (dt > 60) { runOffline(dt); return; }
+  while (dt > 0) { const st = Math.min(dt, 0.25); tick(st); dt -= st; }
+  saveTimer += 0.05;
+}
+function render(t) {
+  requestAnimationFrame(render);
+  if (UI.offline) return;
+  if (t - lastRender < 1000 / (S.opt.fps || 20)) return;
+  lastRender = t;
+  try { updRail(); UI.upd && UI.upd(); } catch (e) { console.error(e); }
+}
+function runOffline(sec) {
+  if (!S.opt.offline || sec < 10) { S.last = Date.now(); return; }
+  UI.offline = true;
+  const before = (S.pt.on && S.pt.p > 2) ? '10↑↑↑' + S.pt.p.toFixed(4) : fmt(S.n);
+  const ticks = Math.min(4000, Math.max(200, Math.ceil(sec / 2))), dt = sec / ticks;
+  const box = $('#modalBox');
+  box.innerHTML = '<h2>你离开了 ' + fmtTime(sec) + '</h2><p>这座塔在你离开时一直在数。正在补算……</p><div class="bar"><i id="offBar"></i></div>';
+  $('#modal').classList.add('on');
+  let done = 0;
+  const batch = () => {
+    const end = Math.min(ticks, done + 40);
+    for (; done < end; done++) tick(dt);
+    $('#offBar').style.width = (done / ticks * 100).toFixed(1) + '%';
+    if (done < ticks) { setTimeout(batch, 0); return; }
+    S.time.offline += sec; S.stat.offlineGot = true;
+    UI.offline = false; lastReal = Date.now(); save();
+    const after = (S.pt.on && S.pt.p > 2) ? '10↑↑↑' + S.pt.p.toFixed(4) : fmt(S.n);
+    modal({ title: '欢迎回来', body: '<p>你离开了 ' + fmtTime(sec) + '。</p><p>数从 <span class="num">' + before + '</span> 变成了 <span class="num">' + after + '</span>。</p>', acts: [{ t: '继续', f: flushPending }] });
+    rebuild();
+  };
+  setTimeout(batch, 30);
+}
+function flushPending() {
+  if (UI.pendingEnd) { UI.pendingEnd = false; UI.pendingStory = []; showEnding(); return; }
+  const st = UI.pendingStory.pop(); UI.pendingStory = [];
+  if (st) modal(st);
+}
+
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea, select') || e.ctrlKey || e.metaKey || e.altKey) return;
+  if ($('#modal').classList.contains('on')) { if (e.key === 'Escape' && !UI.offline) closeModal(); return; }
+  const k = e.key.toLowerCase();
+  if (k === 'm') buyMaxAll();
+  else if (k === 's') buySpd(true);
+  else if (k === 'd') doBoost();
+  else if (k === 'g') doBase();
+  else if (k === 'i') doCrunch();
+  else if (k === 't') { if (canTrans()) doTrans(); }
+  else if (k === 'f') { if (canForce()) doForce(); }
+});
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
+window.addEventListener('beforeunload', save);
+
+function start() {
+  setEmitter(onEmit);
+  const had = load();
+  applyTheme();
+  buildNav();
+  for (const t of TABS) if (!t.sep && t.u()) UI.seenTabs[t.id] = 1;
+  go('count');
+  rotateNews(true);
+  UI.started = true;
+  const away = (Date.now() - (S.last || Date.now())) / 1000;
+  lastReal = Date.now();
+  if (had && away > 60) runOffline(away);
+  else if (!had) modal({ glyph: '1, 2, 3…', title: '数之塔', body: '<p>从手指开始数，一直数到 10↑↑↑10。</p><p>先点几下“数一数”，攒够 10 个数买下第一根手指。之后的事情，交给数学。</p>', acts: [{ t: '开始数' }] });
+  setInterval(stepGame, 50);
+  setInterval(() => { if (!UI.offline) save(); }, 10000);
+  setInterval(() => rotateNews(), 12000);
+  requestAnimationFrame(render);
+}
+start();
+
+</script>
+</body>
+</html>
